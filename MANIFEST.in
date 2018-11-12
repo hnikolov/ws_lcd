@@ -1,0 +1,2 @@
+include ws_lcd/fonts/*
+include ws_lcd/icons/*
