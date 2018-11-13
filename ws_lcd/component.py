@@ -95,8 +95,8 @@ class Component(object):
             im = Image.open(path_prefix + '/icons/' + image)
             im = im.resize((width-2,height-2), Image.ANTIALIAS)
             # center image within component
-#            self.image.paste(im, ((self.w-width)/2, (self.h-height)/2))
-            self.image.paste(im, (1, 1)) # TODO
+            self.image.paste(im, ((self.w-width)/2, (self.h-height)/2+1))
+#            self.image.paste(im, (1, 1)) # TODO
 
     def set_position(self, x, y, r=0):
         self.x   = x
