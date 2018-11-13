@@ -184,7 +184,7 @@ class BarGraph(Component):
     
     def draw_lines(self):
         self.draw.line((2, self.h/2, self.w-2, self.h/2), fill=self.fg) # Middle
-        self.draw.line((2, self.h-1, self.w-2, self.h-1), fill=self.fg) # Bottom
+#        self.draw.line((2, self.h-1, self.w-2, self.h-1), fill=self.fg) # Bottom
 
         # For width=124 and 26, bar width=3 and 1, vertical lines at 6, 12, 18 o'clock
         #pos = self.w/4 if self.w == self.small else self.w/4 - 1 # ((self.w/4 % 2) == 0)
@@ -216,7 +216,8 @@ class BarGraph(Component):
         self.bars[position] = value
         if value > self.max:
             self.max = value
-            self.scale_f = (self.h-2)/float(self.max)
+            y = 4 if self.w == self.small else 2
+            self.scale_f = (self.h-y)/float(self.max)
             
         self.update()
         
@@ -226,10 +227,11 @@ class BarGraph(Component):
         for i, h in enumerate(self.bars):
             sh = self.scale_f * h
             if self.w == self.small:
+                if sh < 2: sh = 2
                 # for width=26, bar width=1
                 offset = 1 + i
-                self.draw.line((offset, self.h-sh, offset, self.h), fill=self.fg)
-            else:            
+                self.draw.line((offset, self.h-sh, offset, self.h-2), fill=self.fg)
+            else:
                 # for width=124, bar width=3
                 offset = 3 + (5 * i)
                 self.draw.rectangle((offset, self.h-sh, offset+2, self.h), fill=self.fg)

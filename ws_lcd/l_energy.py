@@ -3,11 +3,11 @@ import time
 from layout import Layout
 from component import *
 
-class Layout_222(Layout):
+class LEnergy(Layout):
     def __init__(self):
-        super(Layout_222, self).__init__(color = "black")
+        super(LEnergy, self).__init__(color = "black")
         
-        self.ch1     = 18 # component height 1
+        self.ch1     = 20 # component height 1
         self.ch2     = 30 # component height 2
         self.sh1     =  4 # separator height 1
 
@@ -37,49 +37,54 @@ class Layout_222(Layout):
         self.wv   = Component(68, self.ch2, font_size=19)
         self.wv.set_position(30, self.row_1_y)
 
-        self.wu   = Component(26, self.ch2, font_size=16)
-        self.wu.set_position(98, self.row_1_y)
-        self.wu.set_text("Lit", 0, align=0)
+        self.wg   = BarGraph(self.ch2, self.ch2, bg_color=255)
+        self.wg.set_position(98, self.row_1_y)
 
         # --------------------------------------------------------------------------
         self.gi   = Component(self.ch2, self.ch2, iw=26, ih=26, image='gas_32x32.png')
         self.gi.set_position(4, self.row_2_y)
 
-        self.gv   = Component(42, self.ch2, font_size=19, format_string="{0:.2f}")
-        self.gv.set_position(34, self.row_2_y)
+        self.gv   = Component(68, self.ch2, font_size=19, format_string="{0:.2f}")
+        self.gv.set_position(30, self.row_2_y)
 
-        self.gu   = Component(22, self.ch2, font_size=16)
-        self.gu.set_position(76, self.row_2_y)
-        self.gu.set_text("m" + u'\u00B3', 0, align=0)
-
-        self.gg   = BarGraph(self.ch2, self.ch2, bg_color=0)
+        self.gg   = BarGraph(self.ch2, self.ch2, bg_color=255)
         self.gg.set_position(98, self.row_2_y)
-        
+
         # --------------------------------------------------------------------------
         self.ei   = Component(self.ch2, self.ch2, iw=26, ih=26, image='plug1.png')
         self.ei.set_position(4, self.row_3_y)
         
-        self.ev1   = Component(28, self.ch2, font_size=20, format_string="{0:.3f}")
-        self.ev1.set_position(34, self.row_3_y)
-        self.ev1.set_text("12")
-
-        self.ev   = Component(40, 20, font_size=18, format_string="{0:.3f}")
-        self.ev.set_position(62, self.row_3_y+10)
-        
-        self.eu   = Component(40, 10, font_size=10, format_string="{0:.3f}")
-        self.eu.set_position(58, self.row_3_y)
-        self.eu.set_text("kWh")
-        
-        self.eg   = BarGraph(self.ch2, self.ch2, bg_color=0)
+        self.ev   = Component(68, self.ch2, font_size=19, format_string="{0:.3f}")
+        self.ev.set_position(30, self.row_3_y)
+                
+        self.eg   = BarGraph(self.ch2, self.ch2, bg_color=255)
         self.eg.set_position(98, self.row_3_y)
+        
+        # --------------------------------------------------------------------------
+        # self.ei   = Component(self.ch2, self.ch2, iw=26, ih=26, image='plug1.png')
+        # self.ei.set_position(4, self.row_3_y)
+        
+        # self.ev1   = Component(28, self.ch2, font_size=20, format_string="{0:.3f}")
+        # self.ev1.set_position(34, self.row_3_y)
+        # self.ev1.set_text("12")
+
+        # self.ev   = Component(40, 20, font_size=18, format_string="{0:.3f}")
+        # self.ev.set_position(62, self.row_3_y+10)
+        
+        # self.eu   = Component(40, 10, font_size=10, format_string="{0:.3f}")
+        # self.eu.set_position(58, self.row_3_y)
+        # self.eu.set_text("kWh")
+        
+        # self.eg   = BarGraph(self.ch2, self.ch2, bg_color=0)
+        # self.eg.set_position(98, self.row_3_y)
 
         # --------------------------------------------------
 
         # Add components to the layout
         self.add([self.cdate, self.ctime])
-        self.add([self.wi, self.wv, self.wu])
-        self.add([self.gi, self.gv, self.gu, self.gg])
-        self.add([self.ei, self.ev, self.ev1, self.eg, self.eu])
+        self.add([self.wi, self.wv, self.wg])
+        self.add([self.gi, self.gv, self.gg])
+        self.add([self.ei, self.ev, self.eg])
 
         self.clear_all()
 
@@ -101,7 +106,7 @@ if __name__ == '__main__':
     from lcd import LCD
 
     # Display Layout instance
-    L2 = Layout_222()
+    L2 = LEnergy()
 
     # Random values for test
     L2.wv.set(890)    
@@ -116,6 +121,7 @@ if __name__ == '__main__':
         L2.eg.set_bar(i, i+1)
         L2.set_date_time()
         lcd.update(L2)
+#        raw_input()
         
     L2.eg.set_bar(23,12.0)
         
