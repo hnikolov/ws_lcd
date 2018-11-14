@@ -38,8 +38,8 @@ class MQTT_LOGGER():
         """
         client.subscribe("power_meter/status/#")
         client.subscribe(self.mqtt_topic_electricity + '/#')
-        client.subscribe(self.mqtt_topic_gas)
-        client.subscribe(self.mqtt_topic_water)
+        client.subscribe(self.mqtt_topic_gas + '/#')
+        client.subscribe(self.mqtt_topic_water + '/#')
         print "Connected with result code:", str(rc)
         print "Connected to: " + MQTT_SERVER
 
@@ -74,7 +74,7 @@ class MQTT_LOGGER():
             self.my_gui.update_gas(float(msg.payload)) # m3, 10 Litters/msg
             print st[:-3],  ":", msg.topic, ":", msg.payload
             
-        elif self.mqtt_topic_gas in msg.topic: .
+        elif self.mqtt_topic_gas in msg.topic:
             index = int(msg.topic.split('/')[-1])
             self.my_gui.update_gas_hour(index, float(msg.payload))
             print st[:-3],  ":", msg.topic, ":", msg.payload
