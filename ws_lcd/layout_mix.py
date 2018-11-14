@@ -23,9 +23,9 @@ class MY_GUI(object):
         
         self.L1 = self.Layout[0] # Used when updating data
         self.L2 = self.Layout[1]
-        self.L3 = self.Layout[2]
-        self.L4 = self.Layout[3]
-        self.L5 = self.Layout[4]
+        self.L3 = self.Layout[2] # Water
+        self.L4 = self.Layout[3] # Gas
+        self.L5 = self.Layout[4] # Electricity
         
         self.lcd = LCD(False)
         self.draw_display()
@@ -44,6 +44,7 @@ class MY_GUI(object):
         self.L_IDX = (self.L_IDX - 1) % self.L_SIZE
         self.draw_display()
 
+    # TODO: duplicate ppu
     def update_water(self, value):
         self.L1.wv.set(value) # Litter
         self.L2.ewv.set(round(0.0011 * value, 2)) # per Liter

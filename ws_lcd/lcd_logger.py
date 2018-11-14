@@ -55,16 +55,28 @@ class MQTT_LOGGER():
             
         elif self.mqtt_topic_electricity in msg.topic: # covers /1 /2 ... etc.
             index = int(msg.topic.split('/')[-1])
-            self.my_gui.update_electricity_hour(index, float(msg.payload)) # kWh
+            self.my_gui.update_electricity_hour(index, float(msg.payload))
             print st[:-3],  ":", msg.topic, ":", msg.payload
        ##    if msg.topic != self.mqtt_topic_electricity: contains /1 /2 ... etc.
 
+        # -----------------------------------------------------------------
         elif msg.topic == self.mqtt_topic_water:
             self.my_gui.update_water(int(msg.payload)) # Litter
             print st[:-3],  ":", msg.topic, ":", msg.payload
             
+        elif self.mqtt_topic_water in msg.topic: 
+            index = int(msg.topic.split('/')[-1])
+            self.my_gui.update_water_hour(index, float(msg.payload))
+            print st[:-3],  ":", msg.topic, ":", msg.payload
+            
+        # -----------------------------------------------------------------
         elif msg.topic == self.mqtt_topic_gas:
             self.my_gui.update_gas(float(msg.payload)) # m3, 10 Litters/msg
+            print st[:-3],  ":", msg.topic, ":", msg.payload
+            
+        elif self.mqtt_topic_gas in msg.topic: .
+            index = int(msg.topic.split('/')[-1])
+            self.my_gui.update_gas_hour(index, float(msg.payload))
             print st[:-3],  ":", msg.topic, ":", msg.payload
             
 #        else: # msg.topic == status
@@ -83,12 +95,12 @@ class MQTT_LOGGER():
             self.mqtt_client.loop_start()
             while True:
                 # Set date and time here?
-                for i in range(10):
+                for i in range(5):
                     self.my_gui.update_display() # Updated only when data has changed
                     time.sleep(1)
 
                 self.my_gui.layout_next()
-                for i in range(10):
+                for i in range(5):
                     self.my_gui.update_display() # Updated only when data has changed
                     time.sleep(1)
                 self.my_gui.layout_next()
