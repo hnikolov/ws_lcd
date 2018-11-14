@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import time
 from layout import Layout
+from l_energy import LEnergy
+from l_template import LTemplate
 from layout_222 import Layout_222
 from layout_eur import Layout_EUR
 from lcd import LCD
@@ -8,15 +10,22 @@ from lcd import LCD
 
 class MY_GUI(object):
     def __init__(self):
-        L1 = Layout_222()
+#        L1 = Layout_222()
+        L1 = LEnergy()
         L2 = Layout_EUR()
+        L3 = LTemplate(image='tap-water1.jpg', unit='Lit', format_string="{}", ppu=0.0011)
+        L4 = LTemplate(image='gas_32x32.png', unit="m" + u'\u00B3', format_string="{0:.2f}", ppu=0.80025)
+        L5 = LTemplate(image='plug1.png', unit='kW', format_string="{0:.3f}", ppu=0.24)
 
-        self.Layout = [L1, L2] # Used when displaying
+        self.Layout = [L1, L2, L3, L4, L5] # Used when displaying
         self.L_SIZE = len(self.Layout)
         self.L_IDX  = 0
         
         self.L1 = self.Layout[0] # Used when updating data
         self.L2 = self.Layout[1]
+        self.L3 = self.Layout[2]
+        self.L4 = self.Layout[3]
+        self.L5 = self.Layout[4]
         
         self.lcd = LCD(False)
         self.draw_display()
@@ -38,17 +47,29 @@ class MY_GUI(object):
     def update_water(self, value):
         self.L1.wv.set(value) # Litter
         self.L2.ewv.set(round(0.0011 * value, 2)) # per Liter
+        self.L3.update(value)
+
+    def update_water_hour(self, index, value):
+        self.L1.wg.set_bar(index, value) # Liters
+        self.L3.update_hour_data(index, value)
 
     def update_gas(self, value):
         self.L1.gv.set(value) # m3
         self.L2.egv.set(round(0.80025 * value, 2)) # per m3 (2017-2918)
+        self.L4.update(value)
+
+    def update_gas_hour(self, index, value):
+        self.L1.gg.set_bar(index, value) # Liters
+        self.L4.update_hour_data(index, value)
 
     def update_electricity(self, value):
         self.L1.ev.set(value) # kWh
         self.L2.eev.set(round(0.24 * value, 2)) # per kW (2017-2918)
+        self.L5.update(value)
 
     def update_electricity_hour(self, index, value):
-        self.L1.egraph.set_bar(index, value) # kWh
+        self.L1.eg.set_bar(index, value) # kWh
+        self.L5.update_hour_data(index, value)
 
     def update_eur_total(self):
         self.L2.update_total()
@@ -67,15 +88,6 @@ class TEST_MY_GUI(object):
         L1 = self.my_gui.Layout[0]
         L2 = self.my_gui.Layout[1]
         # Random values for test
-#        L1.wv.set(890)    
-#        L1.gv.set(2.64)
-#        L1.ev.set(0.0)
-
-#        L2.ewv.set(0.3)    
-#        L2.egv.set(2.64)
-#        L2.eev.set(0.0)
-#        L2.update_total()
-
         self.my_gui.update_water(890)
         self.my_gui.update_gas(2.64)
         self.my_gui.update_electricity(0.917)
@@ -83,10 +95,14 @@ class TEST_MY_GUI(object):
 
 
     def update_L1(self):
-        self.my_gui.L1.egraph.clear_bars()
+        self.my_gui.L1.wg.clear_bars()
+        self.my_gui.L1.gg.clear_bars()
+        self.my_gui.L1.eg.clear_bars()
 
         for i in range(18):
-            self.my_gui.L1.egraph.set_bar(i, i+1)
+            self.my_gui.update_water_hour(i, i+1)
+            self.my_gui.update_gas_hour(i, i*2)
+            self.my_gui.update_electricity_hour(i, i*3)
 
             self.my_gui.L1.wv.add(1)
             self.my_gui.L1.gv.add(0.01)
@@ -102,7 +118,6 @@ class TEST_MY_GUI(object):
             self.my_gui.L2.egv.add(1)
             self.my_gui.L2.eev.add(0.17)
             self.my_gui.update_eur_total()
-#            self.my_gui.L2.update_total()
 
             self.my_gui.L2.set_date_time()
             self.my_gui.update_display()    
@@ -121,6 +136,11 @@ class TEST_MY_GUI(object):
             
             self.my_gui.layout_prev()            
        
+        # Show all screens
+        for _ in range(10):
+            time.sleep(2)
+            self.my_gui.layout_next()
+
         self.my_gui.lcd.close() 
     
     

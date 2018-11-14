@@ -4,8 +4,10 @@ from layout import Layout
 from component import *
 
 class LTemplate(Layout):
-    def __init__(self, image='plug1.png', unit='kW', format_string="{0:.3f}", ppu=0.18):
+    def __init__(self, image='plug1.png', unit='kW', format_string="{0:.3f}", ppu=0.24):
         super(LTemplate, self).__init__(color = "black")
+        
+        self.price_per_unit = ppu
         
         self.ch1     = 18 # component height 1
         self.ch2     = 26 # component height 2
@@ -31,10 +33,8 @@ class LTemplate(Layout):
         self.ctime.set(time.strftime('%H:%M'))
 #        self.ctime.draw_borders()
 
-#        self.wi   = Component(self.ch2, self.ch2, font_size=20, image='tap-water1.jpg')
         self.wi   = Component(self.ch2, self.ch2, font_size=20, image=image)
         self.wi.set_position(4, self.row_1_y)
-#        self.wi.draw_borders()
 
         self.wv   = Component(68, self.ch2, font_size=18, format_string=format_string)
         self.wv.set_position(30, self.row_1_y)
@@ -43,7 +43,6 @@ class LTemplate(Layout):
         self.wu.set_position(98, self.row_1_y)
         self.wu.set_text(unit, 0, align=0)
 
-#        self.gi   = Component(self.ch2, self.ch2, font_size=20, image='gas_32x32.png')
         self.gi   = Component(self.ch2, self.ch2, font_size=19)
         self.gi.set_position(4, self.row_2_y)
         self.gi.set_text(u'\u03A3', x=0, align=1) # Sigma
@@ -53,15 +52,13 @@ class LTemplate(Layout):
 
         self.gu   = Component(self.ch2, self.ch2, font_size=16)
         self.gu.set_position(98, self.row_2_y)
-#        self.gu.set_text("m" + u'\u00B3', 0, align=0)
         self.gu.set_text(u'\u20AC', x=0, align=0) # Euro 
 
-#        self.ei   = Component(self.ch2, self.ch2, font_size=20, image='plug1.png')
-        self.ei   = Component(self.ch2, self.ch2, font_size=17, bg_color=0)
+        self.ei   = Component(self.ch2, self.ch2, font_size=16, bg_color=0)
         self.ei.set_position(4, self.row_3_y)
         self.ei.set_text("12h", align=1)
 
-        self.ev   = Component(68, self.ch2, font_size=17, format_string=format_string, bg_color=0)
+        self.ev   = Component(68, self.ch2, font_size=16, format_string=format_string, bg_color=0)
         self.ev.set_position(30, self.row_3_y)
 
         self.eu   = Component(self.ch2, self.ch2, font_size=16, bg_color=0)
@@ -88,37 +85,47 @@ class LTemplate(Layout):
         self.ev.set(0.0)
         self.egraph.clear_bars()
 
-
     def set_date_time(self):
-#        tdate = time.strftime('%d-%b-%y')
         self.cdate.set(time.strftime('%d-%b'))
         self.ctime.set(time.strftime('%H:%M'))
         
-
+    def update(self, value):
+        self.wv.set(value)
+        self.gv.set(round(self.price_per_unit * value, 2)) # Eur
+        
+    def update_hour_data(self, position, value):
+        self.ei.set_text(str(position)+"h", align=1) # TODO
+        self.ev.set(value)
+        self.egraph.set_bar(position, value)
+        
+        
 if __name__ == '__main__':
 
     from lcd import LCD
 
     # Display Layout instance
-#    L2 = LTemplate(image='tap-water1.jpg', unit='Lit', format_string="{}")
-#    L2 = LTemplate(image='gas_32x32.png', unit="m" + u'\u00B3', format_string="{0:.2f}")
-    L2 = LTemplate(image='plug1.png', unit='kW', format_string="{0:.3f}")
+#    L2 = LTemplate(image='tap-water1.jpg', unit='Lit', format_string="{}", ppu=0.0011)
+#    L2 = LTemplate(image='gas_32x32.png', unit="m" + u'\u00B3', format_string="{0:.2f}", ppu=0.80025)
+    L2 = LTemplate(image='plug1.png', unit='kW', format_string="{0:.3f}", ppu=0.24)
 
     # Random values for test
-    L2.wv.set(1.890)    
-    L2.gv.set(2.64)
-    L2.ev.set(0.0)
+    L2.update(1.890)    
+#    L2.wv.set(1.890)    
+#    L2.gv.set(2.64)
+#    L2.ev.set(0.0)
 
     # LCD instance
     lcd = LCD(False)       
     lcd.draw(L2)
 
     for i in range(18):
-        L2.egraph.set_bar(i, i+1)
+        L2.update_hour_data(i, i+1)
+#        L2.egraph.set_bar(i, i+1)
         L2.set_date_time()
         lcd.update(L2)
         
-    L2.egraph.set_bar(23,12.0)
+    L2.update_hour_data(23, 12.0)        
+#    L2.egraph.set_bar(23,12.0)
         
     for i in range(5):
         L2.wv.add(0.001)

@@ -32,7 +32,6 @@ class LEnergy(Layout):
 
         self.wi   = Component(self.ch2, self.ch2, iw=26, ih=26, image='tap-water1.jpg')
         self.wi.set_position(4, self.row_1_y)
-#        self.wi.draw_borders()
 
         self.wv   = Component(68, self.ch2, font_size=19)
         self.wv.set_position(30, self.row_1_y)
@@ -59,26 +58,6 @@ class LEnergy(Layout):
                 
         self.eg   = BarGraph(self.ch2, self.ch2, bg_color=255)
         self.eg.set_position(98, self.row_3_y)
-        
-        # --------------------------------------------------------------------------
-        # self.ei   = Component(self.ch2, self.ch2, iw=26, ih=26, image='plug1.png')
-        # self.ei.set_position(4, self.row_3_y)
-        
-        # self.ev1   = Component(28, self.ch2, font_size=20, format_string="{0:.3f}")
-        # self.ev1.set_position(34, self.row_3_y)
-        # self.ev1.set_text("12")
-
-        # self.ev   = Component(40, 20, font_size=18, format_string="{0:.3f}")
-        # self.ev.set_position(62, self.row_3_y+10)
-        
-        # self.eu   = Component(40, 10, font_size=10, format_string="{0:.3f}")
-        # self.eu.set_position(58, self.row_3_y)
-        # self.eu.set_text("kWh")
-        
-        # self.eg   = BarGraph(self.ch2, self.ch2, bg_color=0)
-        # self.eg.set_position(98, self.row_3_y)
-
-        # --------------------------------------------------
 
         # Add components to the layout
         self.add([self.cdate, self.ctime])
@@ -96,7 +75,6 @@ class LEnergy(Layout):
 
 
     def set_date_time(self):
-#        tdate = time.strftime('%d-%b-%y')
         self.cdate.set(time.strftime('%d-%b'))
         self.ctime.set(time.strftime('%H:%M'))
         
