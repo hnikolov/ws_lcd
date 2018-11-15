@@ -2,7 +2,6 @@
 import paho.mqtt.client as mqtt
 import datetime, sys
 import time
-from layout_mix import MY_GUI
 
 MQTT_SERVER = "192.168.2.100"
 
@@ -13,17 +12,18 @@ class FILE_LOGGER():
         self.data_w = ['-'] * 24 # per hour
         self.data_g = ['-'] * 24
         self.data_e = ['-'] * 24
+        self.sdate  = time.strftime('%d-%b-%y')
         
         self.dconn = 0        
-        self.mqtt_topic_electricity = "power_meter/electricity/#"
-        self.mqtt_topic_temperature = "power_meter/temperature/#"
-        self.mqtt_topic_water       = "power_meter/water/#"
-        self.mqtt_topic_gas         = "power_meter/gas/#"
+        self.mqtt_topic_electricity = "power_meter/electricity"
+        self.mqtt_topic_temperature = "power_meter/temperature"
+        self.mqtt_topic_water       = "power_meter/water"
+        self.mqtt_topic_gas         = "power_meter/gas"
         self.mqtt_topic_last_will   = "power_meter/status/F"        
 
         self.mqtt_client = mqtt.Client()
 
-        self.mqtt_client.will_set(topic = self.mqtt_topic_last_will, payload="offline", qos=self.QoS, retain=True)
+        self.mqtt_client.will_set(topic = self.mqtt_topic_last_will, payload="offline", qos=0, retain=True)
         self.mqtt_client.on_connect     = self.on_connect
         self.mqtt_client.on_message     = self.on_message
         self.mqtt_client.on_disconnect  = self.on_disconnect
@@ -39,11 +39,11 @@ class FILE_LOGGER():
         """
         if rc == 0:
 #            client.subscribe("power_meter/status/#") # To log number of disconnects?
-            client.subscribe(self.mqtt_topic_gas)
-            client.subscribe(self.mqtt_topic_water)
-            client.subscribe(self.mqtt_topic_electricity)
+            client.subscribe(self.mqtt_topic_gas + '/#')
+            client.subscribe(self.mqtt_topic_water + '/#')
+            client.subscribe(self.mqtt_topic_electricity + '/#')
             print "Connected to: " + MQTT_SERVER
-            self.mqtt_client.publish(self.mqtt_topic_last_will, "online, " + str(self.dconn), self.QoS, self.retain)
+            self.mqtt_client.publish(self.mqtt_topic_last_will, "online, " + str(self.dconn), qos=0, retain=True)
         print "Result code:", rc
 
     def on_disconnect(self, client, userdata, msg):
@@ -52,11 +52,11 @@ class FILE_LOGGER():
         
     def on_message(self, client, userdata, msg):
         """ The callback for when a PUBLISH message is received from the server. """
-        st = datetime.datetime.fromtimestamp(msg.timestamp).strftime('%Y-%m-%d %H:%M:%S.%f')
-        print st[:-3],  ":", msg.topic, ":", msg.payload
+        #st = datetime.datetime.fromtimestamp(msg.timestamp).strftime('%Y-%m-%d %H:%M:%S.%f')
+        #print st[:-3],  ":", msg.topic, ":", msg.payload
             
         if msg.topic == self.mqtt_topic_water:
-            self.my_gui.update_water(int(msg.payload)) # Litter
+            pass # Litter
             
         elif self.mqtt_topic_water in msg.topic: 
             index = int(msg.topic.split('/')[-1])
@@ -64,7 +64,7 @@ class FILE_LOGGER():
             
         # -----------------------------------------------------------------
         elif msg.topic == self.mqtt_topic_gas:
-            self.my_gui.update_gas(float(msg.payload)) # m3, 10 Litters/msg
+            pass # m3, 10 Litters/msg
             
         elif self.mqtt_topic_gas in msg.topic:
             index = int(msg.topic.split('/')[-1])
@@ -72,7 +72,7 @@ class FILE_LOGGER():
             
         # -----------------------------------------------------------------
         elif msg.topic == self.mqtt_topic_electricity:
-            self.my_gui.update_electricity(float(msg.payload)) # kWh
+            pass # kWh
             
         elif self.mqtt_topic_electricity in msg.topic: # covers /1 /2 ... etc.
             index = int(msg.topic.split('/')[-1])
@@ -84,22 +84,23 @@ class FILE_LOGGER():
         with open(file_name, 'w') as fp:
             fp.write(self.sdate + ', W, G, E')
             for h, (w, g, e) in enumerate(zip(self.data_w, self.data_g, self.data_e)):
-                fp.write(','.join(str(h), w, g, e)
+                fp.write(','.join(['\n'+str(h), w, g, e]))
 
         for i in range(24):
             self.data_w[i] = ['-']
             self.data_g[i] = ['-']
-            self.data_e[i] = ['-']                
+            self.data_e[i] = ['-']       
+            
+        self.sdate = time.strftime('%d-%b-%y') # For next time            
         
     def run(self):
         try:
             self.mqtt_client.loop_start()
             while True:               
-                if int(time.strftime('%H')) == 0: # New day
+                if time.strftime('%d-%b-%y') != self.sdate: # New day
                     time.sleep(30) # Give time to receive the last hour data
                     self.write_file()
-                    time.sleep(3600) # Till next hour, so write only once a day. TODO?
-                time.sleep(1)
+                time.sleep(10)
                 
         except (KeyboardInterrupt, SystemExit, Exception) as e:
             print "Exit...", e
