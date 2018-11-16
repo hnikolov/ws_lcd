@@ -66,7 +66,7 @@ class MQTT_LOGGER():
             
         elif self.mqtt_topic_water in msg.topic: 
             index = int(msg.topic.split('/')[-1])
-            self.my_gui.update_water_hour(index, float(msg.payload))
+            self.my_gui.update_water_hour(index, int(msg.payload))
             print st[:-3],  ":", msg.topic, ":", msg.payload
             
         # -----------------------------------------------------------------
@@ -82,7 +82,7 @@ class MQTT_LOGGER():
 #        else: # msg.topic == status
 #            print st[:-3],  ":", msg.topic, ":", msg.payload
 
-        self.my_gui.set_date_time()
+#        self.my_gui.set_date_time()
         self.my_gui.update_eur_total()
 
 
@@ -92,9 +92,10 @@ class MQTT_LOGGER():
         
     def run(self):
         try:
+            # Where to update the time?
             self.mqtt_client.loop_start()
             while True:
-                # Set date and time here?
+                self.my_gui.set_date_time()
                 for i in range(5):
                     self.my_gui.update_display() # Updated only when data has changed
                     time.sleep(1)

@@ -78,6 +78,9 @@ class MY_GUI(object):
     def set_date_time(self):
         self.L1.set_date_time()
         self.L2.set_date_time()
+        self.L3.set_date_time()
+        self.L4.set_date_time()
+        self.L5.set_date_time()
         
 # ===========================================================
 class TEST_MY_GUI(object):

@@ -190,11 +190,12 @@ class BarGraph(Component):
         #pos = self.w/4 if self.w == self.small else self.w/4 - 1 # ((self.w/4 % 2) == 0)
         #y = 2 if self.w == self.small else self.h
         if self.w == self.small:
-            pos = self.w/4 
-            y = 2
-            self.draw.line((  pos, 0,   pos, y), fill=self.fg) # Vertical
-            self.draw.line((2*pos, 0, 2*pos, y), fill=self.fg) # Vertical
-            self.draw.line((3*pos, 0, 3*pos, y), fill=self.fg) # Vertical
+            #pos = self.w/4 
+            #y = 2
+            #self.draw.line((  pos, 0,   pos, y), fill=self.fg) # Vertical
+            #self.draw.line((2*pos, 0, 2*pos, y), fill=self.fg) # Vertical
+            #self.draw.line((3*pos, 0, 3*pos, y), fill=self.fg) # Vertical
+            pass
         else:
             pos = self.w/4 - 1
             y = self.h
