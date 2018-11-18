@@ -9,7 +9,7 @@ MQTT_SERVER = "192.168.2.100"
 
 class MQTT_LOGGER():
     """ Send data via mqtt... """
-    def __init__(self):
+    def __init__(self, WS = False):
 #        self.QoS    = 0
 #        self.retain = True
 
@@ -28,7 +28,7 @@ class MQTT_LOGGER():
 
         self.mqtt_client.connect(MQTT_SERVER, 1883, 60)
 
-        self.my_gui = MY_GUI()
+        self.my_gui = MY_GUI(WS)
 
     # MQTT handler ===============================================================================
     def on_connect(self, client, userdata, flags, rc):
@@ -114,6 +114,6 @@ class MQTT_LOGGER():
 
 # ============================================================================================
 if __name__ == '__main__':
-    myApp = MQTT_LOGGER()
+    myApp = MQTT_LOGGER(WS=False)
     myApp.run()
 

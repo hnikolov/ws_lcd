@@ -9,7 +9,7 @@ from lcd import LCD
 
 
 class MY_GUI(object):
-    def __init__(self):
+    def __init__(self, WS = False):
 #        L1 = Layout_222()
         L1 = LEnergy()
         L2 = Layout_EUR()
@@ -27,7 +27,7 @@ class MY_GUI(object):
         self.L4 = self.Layout[3] # Gas
         self.L5 = self.Layout[4] # Electricity
         
-        self.lcd = LCD(False)
+        self.lcd = LCD(WS)
         self.draw_display()
    
     def draw_display(self):
