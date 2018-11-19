@@ -19,7 +19,7 @@ class MQTT_LOGGER():
         self.mqtt_topic_gas             = "power_meter/gas"
         self.mqtt_topic_request         = "power_meter_logger/request"
 
-        self.mqtt_client = mqtt.Client(client_id="hat_lcd")
+        self.mqtt_client = mqtt.Client(client_id="lcd_logger")
 
         # self.mqtt_client.will_set(topic = "power_meter/status", payload="offline", qos=self.QoS, retain=self.retain)
         self.mqtt_client.on_connect     = self.on_connect
@@ -56,28 +56,27 @@ class MQTT_LOGGER():
         elif self.mqtt_topic_electricity in msg.topic: # covers /1 /2 ... etc.
             index = int(msg.topic.split('/')[-1])
             self.my_gui.update_electricity_hour(index, float(msg.payload))
-            print st[:-3],  ":", msg.topic, ":", msg.payload
-       ##    if msg.topic != self.mqtt_topic_electricity: contains /1 /2 ... etc.
+#            print st[:-3],  ":", msg.topic, ":", msg.payload
 
         # -----------------------------------------------------------------
         elif msg.topic == self.mqtt_topic_water:
             self.my_gui.update_water(int(msg.payload)) # Litter
-            print st[:-3],  ":", msg.topic, ":", msg.payload
+#            print st[:-3],  ":", msg.topic, ":", msg.payload
 
         elif self.mqtt_topic_water in msg.topic: 
             index = int(msg.topic.split('/')[-1])
             self.my_gui.update_water_hour(index, int(msg.payload))
-            print st[:-3],  ":", msg.topic, ":", msg.payload
+#            print st[:-3],  ":", msg.topic, ":", msg.payload
 
         # -----------------------------------------------------------------
         elif msg.topic == self.mqtt_topic_gas:
             self.my_gui.update_gas(float(msg.payload)) # m3, 10 Litters/msg
-            print st[:-3],  ":", msg.topic, ":", msg.payload
+#            print st[:-3],  ":", msg.topic, ":", msg.payload
 
         elif self.mqtt_topic_gas in msg.topic:
             index = int(msg.topic.split('/')[-1])
             self.my_gui.update_gas_hour(index, float(msg.payload))
-            print st[:-3],  ":", msg.topic, ":", msg.payload
+#            print st[:-3],  ":", msg.topic, ":", msg.payload
 
 #        else: # msg.topic == status
 #            print st[:-3],  ":", msg.topic, ":", msg.payload
