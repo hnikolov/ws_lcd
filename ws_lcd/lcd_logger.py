@@ -90,6 +90,12 @@ class MQTT_LOGGER():
         """ The callback for when disconnect from the server. """
         print "Disconnected:", msg
         
+    def display_next(self):
+        self.my_gui.layout_next()
+
+    def display_prev(self):
+        self.my_gui.layout_prev()
+
     def run(self):
         try:
             # Where to update the time?
@@ -111,6 +117,19 @@ class MQTT_LOGGER():
             self.mqtt_client.loop_stop()
             self.my_gui.lcd.close()
 
+    def run_1(self):
+        try:
+            # Where to update the time?
+            self.mqtt_client.loop_start()
+            while True:
+                self.my_gui.set_date_time()
+                self.my_gui.update_display() # Updated only when data has changed
+                time.sleep(1)
+
+        except (KeyboardInterrupt, SystemExit, Exception) as e:
+            print "Exit...", e
+            self.mqtt_client.loop_stop()
+            self.my_gui.lcd.close()
 
 # ============================================================================================
 if __name__ == '__main__':

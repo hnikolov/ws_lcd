@@ -1,20 +1,24 @@
 #!/usr/bin/python
 """ Testing the 3 keys and the 5-key joystick of Waveshare 1in44-LCD-HAT """
-import st7735s as controller
-import time
-from PIL import Image
+#import st7735s as controller
+#import time
+#from PIL import Image
+#
+#screen = controller.ST7735S()
+#
+#img1 = Image.open("assets/1.jpg")
+#img2 = Image.open("assets/2.png")
+#img3 = Image.open("assets/sky.bmp")
+#img4 = Image.open("assets/time.bmp")
 
-screen = controller.ST7735S()
+from lcd_logger import MQTT_LOGGER
 
-img1 = Image.open("assets/1.jpg")
-img2 = Image.open("assets/2.png")
-img3 = Image.open("assets/sky.bmp")
-img4 = Image.open("assets/time.bmp")
+myApp = MQTT_LOGGER(WS=True)
 
 class G():
-    L_IMG     = [img1, img2, img3, img4]
-    L_SIZE    = len(L_IMG)
-    L_IDX     = 0
+#    L_IMG     = [img1, img2, img3, img4]
+#    L_SIZE    = len(L_IMG)
+#    L_IDX     = 0
     BACKLIGHT = False
 
 import RPi.GPIO as GPIO
@@ -55,11 +59,11 @@ GPIO.setup(BL, GPIO.OUT)
 
 def cbk_key_1 (channel):
 #    print "Key 1"
-    img_next()
+    myApp.display_next()
 
 def cbk_key_2 (channel):
 #    print "Key 2"
-    img_prev()
+    myApp.display_prev()
 
 def cbk_key_3 (channel):
 #    print "Key 3"
@@ -67,19 +71,19 @@ def cbk_key_3 (channel):
 
 def cbk_jsk_up(channel):
 #    print "Joystick Up"
-    img_next()
+    myApp.display_next()
 
 def cbk_jsk_dn(channel):
 #    print "Joystick Down"
-    img_prev()
+    myApp.display_prev()
 
 def cbk_jsk_lt(channel):
 #    print "Joystick Left"
-    img_prev()
+    myApp.display_prev()
 
 def cbk_jsk_rt(channel):
 #    print "Joystick Right"
-    img_next()
+    myApp.display_next()
 
 def cbk_jsk_ps(channel):
 #    print "Joystick Press"
@@ -94,35 +98,47 @@ def backlight_toggle():
     G.BACKLIGHT = not G.BACKLIGHT
     GPIO.output(BL, G.BACKLIGHT)
 
-def img_next():
-    G.L_IDX = (G.L_IDX + 1) % G.L_SIZE
-    screen.draw( G.L_IMG[G.L_IDX] )
-
-def img_prev():
-    G.L_IDX = (G.L_IDX - 1) % G.L_SIZE
-    screen.draw( G.L_IMG[G.L_IDX] )
-
-def run():
-    try:
-        backlight_off()
-        screen.draw( G.L_IMG[G.L_IDX] )
-        while True: time.sleep(10)
-
-    except (KeyboardInterrupt, SystemExit, Exception) as e:
-        print "Exit...", e
-        screen.close()
-        GPIO.cleanup()
+#def img_next():
+#    G.L_IDX = (G.L_IDX + 1) % G.L_SIZE
+#    screen.draw( G.L_IMG[G.L_IDX] )
+#
+#def img_prev():
+#    G.L_IDX = (G.L_IDX - 1) % G.L_SIZE
+#    screen.draw( G.L_IMG[G.L_IDX] )
+#
+#def run():
+#    try:
+#        backlight_off()
+#        screen.draw( G.L_IMG[G.L_IDX] )
+#        while True: time.sleep(10)
+#
+#    except (KeyboardInterrupt, SystemExit, Exception) as e:
+#        print "Exit...", e
+#        screen.close()
+#        GPIO.cleanup()
 
 # ============================================================================================
 if __name__ == '__main__':
 
-    GPIO.add_event_detect(KEY_1,  GPIO.FALLING, callback = cbk_key_1,  bouncetime = 300)
-    GPIO.add_event_detect(KEY_2,  GPIO.FALLING, callback = cbk_key_2,  bouncetime = 300)
-    GPIO.add_event_detect(KEY_3,  GPIO.FALLING, callback = cbk_key_3,  bouncetime = 300)
-    GPIO.add_event_detect(JSK_UP, GPIO.FALLING, callback = cbk_jsk_up, bouncetime = 300)
-    GPIO.add_event_detect(JSK_DN, GPIO.FALLING, callback = cbk_jsk_dn, bouncetime = 300)
-    GPIO.add_event_detect(JSK_LT, GPIO.FALLING, callback = cbk_jsk_lt, bouncetime = 300)
-    GPIO.add_event_detect(JSK_RT, GPIO.FALLING, callback = cbk_jsk_rt, bouncetime = 300)
-    GPIO.add_event_detect(JSK_PS, GPIO.FALLING, callback = cbk_jsk_ps, bouncetime = 300)
+    myApp = MQTT_LOGGER(WS=True)
+    
+    GPIO.add_event_detect(KEY_1,  GPIO.FALLING, callback = myApp.display_next(), bouncetime = 300)
+    GPIO.add_event_detect(KEY_2,  GPIO.FALLING, callback = myApp.display_prev(), bouncetime = 300)
+    GPIO.add_event_detect(KEY_3,  GPIO.FALLING, callback = backlight_toggle(),   bouncetime = 300)
+    GPIO.add_event_detect(JSK_UP, GPIO.FALLING, callback = myApp.display_next(), bouncetime = 300)
+    GPIO.add_event_detect(JSK_DN, GPIO.FALLING, callback = myApp.display_prev(), bouncetime = 300)
+    GPIO.add_event_detect(JSK_LT, GPIO.FALLING, callback = myApp.display_prev(), bouncetime = 300)
+    GPIO.add_event_detect(JSK_RT, GPIO.FALLING, callback = myApp.display_next(), bouncetime = 300)
+    GPIO.add_event_detect(JSK_PS, GPIO.FALLING, callback = backlight_toggle(),   bouncetime = 300)
 
-    run()
+    # GPIO.add_event_detect(KEY_1,  GPIO.FALLING, callback = cbk_key_1,  bouncetime = 300)
+    # GPIO.add_event_detect(KEY_2,  GPIO.FALLING, callback = cbk_key_2,  bouncetime = 300)
+    # GPIO.add_event_detect(KEY_3,  GPIO.FALLING, callback = cbk_key_3,  bouncetime = 300)
+    # GPIO.add_event_detect(JSK_UP, GPIO.FALLING, callback = cbk_jsk_up, bouncetime = 300)
+    # GPIO.add_event_detect(JSK_DN, GPIO.FALLING, callback = cbk_jsk_dn, bouncetime = 300)
+    # GPIO.add_event_detect(JSK_LT, GPIO.FALLING, callback = cbk_jsk_lt, bouncetime = 300)
+    # GPIO.add_event_detect(JSK_RT, GPIO.FALLING, callback = cbk_jsk_rt, bouncetime = 300)
+    # GPIO.add_event_detect(JSK_PS, GPIO.FALLING, callback = cbk_jsk_ps, bouncetime = 300)
+
+    #run()
+    myApp.run_1()
