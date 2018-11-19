@@ -48,11 +48,11 @@ class MQTT_LOGGER():
         """ The callback for when a PUBLISH message is received from the server. """
         st = datetime.datetime.fromtimestamp(msg.timestamp).strftime('%Y-%m-%d %H:%M:%S.%f')
 #        print st[:-3],  ":", msg.topic, ":", msg.payload
-            
+
         # Note: Update_display from this function does not work
         if msg.topic == self.mqtt_topic_electricity:
             self.my_gui.update_electricity(float(msg.payload)) # kWh
-            
+
         elif self.mqtt_topic_electricity in msg.topic: # covers /1 /2 ... etc.
             index = int(msg.topic.split('/')[-1])
             self.my_gui.update_electricity_hour(index, float(msg.payload))
@@ -63,33 +63,32 @@ class MQTT_LOGGER():
         elif msg.topic == self.mqtt_topic_water:
             self.my_gui.update_water(int(msg.payload)) # Litter
             print st[:-3],  ":", msg.topic, ":", msg.payload
-            
+
         elif self.mqtt_topic_water in msg.topic: 
             index = int(msg.topic.split('/')[-1])
             self.my_gui.update_water_hour(index, int(msg.payload))
             print st[:-3],  ":", msg.topic, ":", msg.payload
-            
+
         # -----------------------------------------------------------------
         elif msg.topic == self.mqtt_topic_gas:
             self.my_gui.update_gas(float(msg.payload)) # m3, 10 Litters/msg
             print st[:-3],  ":", msg.topic, ":", msg.payload
-            
+
         elif self.mqtt_topic_gas in msg.topic:
             index = int(msg.topic.split('/')[-1])
             self.my_gui.update_gas_hour(index, float(msg.payload))
             print st[:-3],  ":", msg.topic, ":", msg.payload
-            
+
 #        else: # msg.topic == status
 #            print st[:-3],  ":", msg.topic, ":", msg.payload
 
-#        self.my_gui.set_date_time()
         self.my_gui.update_eur_total()
 
 
     def on_disconnect(self, client, userdata, msg):
         """ The callback for when disconnect from the server. """
         print "Disconnected:", msg
-        
+
     def display_next(self):
         self.my_gui.layout_next()
 
@@ -98,7 +97,6 @@ class MQTT_LOGGER():
 
     def run(self):
         try:
-            # Where to update the time?
             self.mqtt_client.loop_start()
             while True:
                 self.my_gui.set_date_time()
@@ -133,6 +131,6 @@ class MQTT_LOGGER():
 
 # ============================================================================================
 if __name__ == '__main__':
-    myApp = MQTT_LOGGER(WS=False)
+    myApp = MQTT_LOGGER(WS=True)
     myApp.run()
 
