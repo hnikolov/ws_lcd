@@ -10,18 +10,16 @@ MQTT_SERVER = "192.168.2.100"
 class MQTT_LOGGER():
     """ Send data via mqtt... """
     def __init__(self, WS = False):
-#        self.QoS    = 0
-#        self.retain = True
-
+        self.dconn = 0
         self.mqtt_topic_electricity     = "power_meter/electricity"
         self.mqtt_topic_temperature     = "power_meter/temperature"
         self.mqtt_topic_water           = "power_meter/water"
         self.mqtt_topic_gas             = "power_meter/gas"
-        self.mqtt_topic_request         = "power_meter_logger/request"
+        self.mqtt_topic_last_will       = "power_meter/status/L"
 
         self.mqtt_client = mqtt.Client(client_id="lcd_logger")
 
-        # self.mqtt_client.will_set(topic = "power_meter/status", payload="offline", qos=self.QoS, retain=self.retain)
+        self.mqtt_client.will_set(topic = self.mqtt_topic_last_will, payload="offline", qos=0, retain=True)
         self.mqtt_client.on_connect     = self.on_connect
         self.mqtt_client.on_message     = self.on_message
         self.mqtt_client.on_disconnect  = self.on_disconnect
@@ -40,9 +38,14 @@ class MQTT_LOGGER():
         client.subscribe(self.mqtt_topic_electricity + '/#')
         client.subscribe(self.mqtt_topic_gas + '/#')
         client.subscribe(self.mqtt_topic_water + '/#')
+        self.mqtt_client.publish(self.mqtt_topic_last_will, "online, " + str(self.dconn), qos=0, retain=True)
         print "Connected with result code:", str(rc)
         print "Connected to: " + MQTT_SERVER
 
+    def on_disconnect(self, client, userdata, msg):
+        """ The callback for when disconnect from the server. """
+        print "Disconnected:", msg
+        self.dconn += 1
 
     def on_message(self, client, userdata, msg):
         """ The callback for when a PUBLISH message is received from the server. """
@@ -56,37 +59,28 @@ class MQTT_LOGGER():
         elif self.mqtt_topic_electricity in msg.topic: # covers /1 /2 ... etc.
             index = int(msg.topic.split('/')[-1])
             self.my_gui.update_electricity_hour(index, float(msg.payload))
-#            print st[:-3],  ":", msg.topic, ":", msg.payload
 
         # -----------------------------------------------------------------
         elif msg.topic == self.mqtt_topic_water:
             self.my_gui.update_water(int(msg.payload)) # Litter
-#            print st[:-3],  ":", msg.topic, ":", msg.payload
 
         elif self.mqtt_topic_water in msg.topic: 
             index = int(msg.topic.split('/')[-1])
             self.my_gui.update_water_hour(index, int(msg.payload))
-#            print st[:-3],  ":", msg.topic, ":", msg.payload
 
         # -----------------------------------------------------------------
         elif msg.topic == self.mqtt_topic_gas:
             self.my_gui.update_gas(float(msg.payload)) # m3, 10 Litters/msg
-#            print st[:-3],  ":", msg.topic, ":", msg.payload
 
         elif self.mqtt_topic_gas in msg.topic:
             index = int(msg.topic.split('/')[-1])
             self.my_gui.update_gas_hour(index, float(msg.payload))
-#            print st[:-3],  ":", msg.topic, ":", msg.payload
 
 #        else: # msg.topic == status
 #            print st[:-3],  ":", msg.topic, ":", msg.payload
 
         self.my_gui.update_eur_total()
 
-
-    def on_disconnect(self, client, userdata, msg):
-        """ The callback for when disconnect from the server. """
-        print "Disconnected:", msg
 
     def display_next(self):
         self.my_gui.layout_next()
