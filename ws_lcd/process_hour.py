@@ -28,7 +28,7 @@ class ProcessHourData(object):
         self.mqtt_topic_electricity = "power_meter/electricity"
         self.mqtt_topic_last_will   = "power_meter/status/H"
 
-        self.mqtt_client = mqtt.Client()
+        self.mqtt_client = mqtt.Client(client_id="process_hour")
 
         # To use the will message at the EDP side, subscribe to topic power_meter/status
         self.mqtt_client.will_set(topic = self.mqtt_topic_last_will, payload="offline", qos=self.QoS, retain=True)
