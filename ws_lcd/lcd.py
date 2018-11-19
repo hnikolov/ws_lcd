@@ -1,3 +1,5 @@
+import itertools
+
 class LCD:
     """ """
     def __init__(self, Waveshare = False):
@@ -14,7 +16,9 @@ class LCD:
     def update(self, layout):
         for c in layout.components:
             if c.invalid != 0:
-                self.lcd.draw_at(c.image, c.x, c.y)
+                # convert (from mode 1 to rgb) needed when using the actual LCD
+                image = c.image.convert('RGB')
+                self.lcd.draw_at(image, c.x, c.y)
                 c.invalid = 0
 
    # TODO landscape: self.lcd.set_frame_memory(c.image.transpose(Image.ROTATE_270), c.x, c.y)        
