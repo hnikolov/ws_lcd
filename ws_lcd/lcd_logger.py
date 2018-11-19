@@ -19,7 +19,7 @@ class MQTT_LOGGER():
         self.mqtt_topic_gas             = "power_meter/gas"
         self.mqtt_topic_request         = "power_meter_logger/request"
 
-        self.mqtt_client = mqtt.Client()
+        self.mqtt_client = mqtt.Client(client_id="hat_lcd")
 
         # self.mqtt_client.will_set(topic = "power_meter/status", payload="offline", qos=self.QoS, retain=self.retain)
         self.mqtt_client.on_connect     = self.on_connect
