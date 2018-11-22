@@ -14,9 +14,14 @@ PIN_WATER = 19
 PIN_GAS   = 20
 PIN_ELEC  = 16
 
+GPIO.setup(PIN_WATER, GPIO.IN, pull_up_down = GPIO.PUD_UP)
+GPIO.setup(PIN_GAS,   GPIO.IN, pull_up_down = GPIO.PUD_UP)
+GPIO.setup(PIN_ELEC,  GPIO.IN, pull_up_down = GPIO.PUD_UP)
+
 class LAST_TIME():
     W = 0.0
     G = 0.0
+    E = 0.0
         
 def cbk_w(channel):
     current_time = time.time() # sec.XX
@@ -34,8 +39,11 @@ def cbk_g(channel):
 #        print "Gas IRQ took", round((time.time() - current_time)*1000, 3), "ms, pin =", GPIO.input(channel)
 
 def cbk_e(channel):
-    myApp.e += 0.001
-
+    current_time = time.time() # sec.XX
+    if current_time - LAST_TIME.E > 0.2: # sec
+        myApp.e += 0.001
+        
+    LAST_TIME.E = current_time
 # ============================================================================================
 if __name__ == '__main__':
 

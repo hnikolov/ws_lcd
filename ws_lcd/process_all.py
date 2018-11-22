@@ -2,11 +2,14 @@
 import paho.mqtt.client as mqtt
 import time
 
-#import RPi.GPIO as GPIO
-#GPIO.setmode(GPIO.BCM)
-#PIN_LED   = 26
-def led_on():  pass #print "led on\n"  # GPIO.output(PIN_LED, True)
-def led_off(): pass #print "led off\n" # GPIO.output(PIN_LED, False)
+import RPi.GPIO as GPIO
+GPIO.setmode(GPIO.BCM)
+
+PIN_LED = 26
+GPIO.setup(PIN_LED,   GPIO.OUT)
+
+def led_on():  GPIO.output(PIN_LED, True)
+def led_off(): GPIO.output(PIN_LED, False)
     
 MQTT_SERVER = "192.168.2.100"
 
@@ -16,14 +19,14 @@ class PROCESS_ALL(object):
         self.h_g = [0.0] * 24
         self.h_e = [0.0] * 24
 
-        self.hour  = int(time.strftime('%M'))%24
+        self.hour  = int(time.strftime('%H'))
         self.sdate = time.strftime('%d-%b-%y')
         
         self.cleared_mqtt = False
-        self.cleared_data = True
         
         self.w  = 0   # Updated (+1) by irq
         self.lw = 0   # Last sent water
+        self.phw = 0   # Previous hour water
         self.g  = 0.0 # Updated (+0.01) by irq  
         self.lg = 0.0 # Last sent gas
         self.e  = 0.0 # Updated (+0.001) by irq
@@ -65,10 +68,10 @@ class PROCESS_ALL(object):
 
     def on_publish(self, client, userdata, mid):
         led_off() # TODO
-        pass
     # ===============================================================================    
 
     def connect(self):
+        led_on()
         self.mqtt_client.loop_stop() # Stop also auto reconnects
         self.mqtt_client.connect(MQTT_SERVER, 1883, 60)
         self.mqtt_client.loop_start()
@@ -124,12 +127,13 @@ class PROCESS_ALL(object):
             self.h_w[i] = 0
             self.h_g[i] = 0.0
             self.h_e[i] = 0.0
-            self.w  = 0   # Updated (+1) by irq
-            self.lw = 0   # Last sent water
-            self.g  = 0.0 # Updated (+0.01) by irq  
-            self.lg = 0.0 # Last sent gas
-            self.e  = 0.0 # Updated (+0.001) by irq
-            self.le = 0.0 # Last sent electricity
+
+        self.w  = 0   # Updated (+1) by irq
+        self.lw = 0   # Last sent water
+        self.g  = 0.0 # Updated (+0.01) by irq  
+        self.lg = 0.0 # Last sent gas
+        self.e  = 0.0 # Updated (+0.001) by irq
+        self.le = 0.0 # Last sent electricity
     
     def run(self):
         try:
@@ -140,39 +144,27 @@ class PROCESS_ALL(object):
                 else:
                     self.update_data()
                                 
-                    if int(time.strftime('%M'))%24 != self.hour:                        
-                        self.update_hour(self.hour%24)
-                        self.hour = int(time.strftime('%M'))%24
+                    if int(time.strftime('%H')) != self.hour:                        
+                        self.update_hour(self.hour)
+                        self.hour = int(time.strftime('%H'))
                                         
-                    if self.hour == 1 and self.cleared_mqtt == False: # New day 01:00 - clear data
+                    if self.hour == 1 and self.cleared_mqtt == False: # New day 01:00 - clear mqtt data
                         self.clear_mqtt_data()
                         self.cleared_mqtt = True                        
-                        self.cleared_data = False                       
 
-                    if self.hour == 0 and self.cleared_data == False:
-#                    if time.strftime('%d-%b-%y') != self.sdate: # New day
+                    if time.strftime('%d-%b-%y') != self.sdate: # New day
                         self.write_file()
                         self.clear_data()
                         self.cleared_mqtt = False
-                        self.cleared_data = True
                         self.sdate = time.strftime('%d-%b-%y')
                     
                     time.sleep(1)
                     
-                    self.e += 0.001
-                    time.sleep(1)
-                    self.g += 0.01
-                    self.e += 0.001
-                    time.sleep(1)
-                    self.w += 1
-                    self.g += 0.01
-                    self.e += 0.001
-                    time.sleep(1)
-
         except (KeyboardInterrupt, SystemExit, Exception) as e:
             print "Exit...", e
             self.mqtt_client.loop_stop()
             self.mqtt_client.disconnect()
+            GPIO.cleanup()
             
         
 if __name__ == '__main__':
