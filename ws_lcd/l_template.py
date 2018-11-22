@@ -94,7 +94,8 @@ class LTemplate(Layout):
         self.gv.set(round(self.price_per_unit * value, 2)) # Eur
         
     def update_hour_data(self, position, value):
-        self.ei.set_text(str(position)+"h", align=1) # TODO
+        hour = (position + 1) % 24
+        self.ei.set_text(str(hour)+"h", align=1) # TODO
         self.ev.set(value)
         self.egraph.set_bar(position, value)
         

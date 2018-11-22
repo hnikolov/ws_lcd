@@ -20,6 +20,7 @@ class PROCESS_ALL(object):
         self.sdate = time.strftime('%d-%b-%y')
         
         self.cleared_mqtt = False
+        self.cleared_data = True
         
         self.w  = 0   # Updated (+1) by irq
         self.lw = 0   # Last sent water
@@ -58,8 +59,8 @@ class PROCESS_ALL(object):
     def on_disconnect(self, client, userdata, msg):
         """ The callback for when disconnect from the server. """
         print "Disconnected:", msg
-        self.connected == False
-        self.dconn     += 1
+        self.connected = False
+        self.dconn    += 1
         led_off() # TODO
 
     def on_publish(self, client, userdata, mid):
@@ -146,12 +147,14 @@ class PROCESS_ALL(object):
                     if self.hour == 1 and self.cleared_mqtt == False: # New day 01:00 - clear data
                         self.clear_mqtt_data()
                         self.cleared_mqtt = True                        
+                        self.cleared_data = False                       
 
-                    if time.strftime('%d-%b-%y') != self.sdate: # New day
-                        # TODO: clear data (w, lw, etc.)?
+                    if self.hour == 0 and self.cleared_data == False:
+#                    if time.strftime('%d-%b-%y') != self.sdate: # New day
                         self.write_file()
                         self.clear_data()
                         self.cleared_mqtt = False
+                        self.cleared_data = True
                         self.sdate = time.strftime('%d-%b-%y')
                     
                     time.sleep(1)
