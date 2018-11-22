@@ -28,6 +28,7 @@ class ProcessHourData(object):
         self.mqtt_topic_electricity = "power_meter/electricity"
         self.mqtt_topic_last_will   = "power_meter/status/H"
 
+        self.mqtt_client.disconnect() # Just in case
         self.mqtt_client = mqtt.Client(client_id="process_hour")
 
         # To use the will message at the EDP side, subscribe to topic power_meter/status
@@ -117,6 +118,7 @@ class ProcessHourData(object):
         except (KeyboardInterrupt, SystemExit, Exception) as e:
             print "Exit...", e
             self.mqtt_client.loop_stop()
+            self.mqtt_client.disconnect()
             
         
 if __name__ == '__main__':

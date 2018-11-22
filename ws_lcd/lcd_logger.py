@@ -24,6 +24,7 @@ class MQTT_LOGGER():
         self.mqtt_client.on_message     = self.on_message
         self.mqtt_client.on_disconnect  = self.on_disconnect
 
+        self.mqtt_client.disconnect() # Just in case
         self.mqtt_client.connect(MQTT_SERVER, 1883, 60)
 
         self.my_gui = MY_GUI(WS)
@@ -120,6 +121,7 @@ class MQTT_LOGGER():
         except (KeyboardInterrupt, SystemExit, Exception) as e:
             print "Exit...", e
             self.mqtt_client.loop_stop()
+            self.mqtt_client.disconnect()
             self.my_gui.lcd.close()
 
 # ============================================================================================
