@@ -65,8 +65,8 @@ class ProcessHourData(object):
     def on_disconnect(self, client, userdata, msg):
         """ The callback for when disconnect from the server. """
         print "Disconnected:", msg
-        self.connected == False
-        self.dconn     += 1
+        self.connected = False
+        self.dconn    += 1
     # ===============================================================================    
 
     def publish_data(self, hour):

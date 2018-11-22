@@ -42,13 +42,15 @@ class MQTT_LOGGER():
         client.subscribe(self.mqtt_topic_gas + '/#')
         client.subscribe(self.mqtt_topic_water + '/#')
         self.mqtt_client.publish(self.mqtt_topic_last_will, "online, " + str(self.dconn), qos=0, retain=True)
+        self.connected = True
         print "Connected with result code:", str(rc)
         print "Connected to: " + MQTT_SERVER
 
     def on_disconnect(self, client, userdata, msg):
         """ The callback for when disconnect from the server. """
         print "Disconnected:", msg
-        self.dconn += 1
+        self.connected = False
+        self.dconn    += 1
 
     def on_message(self, client, userdata, msg):
         """ The callback for when a PUBLISH message is received from the server. """
