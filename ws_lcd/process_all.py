@@ -2,6 +2,12 @@
 import paho.mqtt.client as mqtt
 import time
 
+import RPi.GPIO as GPIO
+GPIO.setmode(GPIO.BCM)
+PIN_LED   = 26
+def led_on():  GPIO.output(PIN_LED, True)
+def led_off(): GPIO.output(PIN_LED, False)
+    
 MQTT_SERVER = "192.168.2.100"
 
 class PROCESS_ALL(object):
@@ -36,12 +42,14 @@ class PROCESS_ALL(object):
         self.mqtt_client.will_set(topic = self.mqtt_topic_last_will, payload="offline", qos=self.QoS, retain=True)
         self.mqtt_client.on_connect     = self.on_connect
         self.mqtt_client.on_disconnect  = self.on_disconnect
+        self.mqtt_client.on_publish     = self.on_publish
      
     # MQTT handler ===============================================================================
     def on_connect(self, client, userdata, flags, rc):
         if rc == 0:
             self.connected = True
             print "Connected to: " + MQTT_SERVER
+            led_off()            
             self.mqtt_client.publish(self.mqtt_topic_last_will, "online, " + str(self.dconn), self.QoS, self.retain)
         print "Result code:", rc
             
@@ -50,6 +58,11 @@ class PROCESS_ALL(object):
         print "Disconnected:", msg
         self.connected == False
         self.dconn     += 1
+        led_off() # TODO
+
+    def on_publish(self, client, userdata, mid):
+        led_off() # TODO
+        pass
     # ===============================================================================    
 
     def connect(self):
@@ -60,19 +73,22 @@ class PROCESS_ALL(object):
             print "Connecting..."
             time.sleep(1)
         
-
+    def publish(self, topic, data):
+        led_on()
+        self.mqtt_client.publish(topic, data, self.QoS, self.retain)
+        
     def update_data():
         if self.lw != self.w:
             self.lw = self.w
-            self.mqtt_client.publish(self.mqtt_topic_water, self.lw, self.QoS, self.retain) 
+            self.publish(self.mqtt_topic_water, self.lw) 
             
         if self.lg != self.g:
             self.lg = self.g
-            self.mqtt_client.publish(self.mqtt_topic_gas, self.lg, self.QoS, self.retain) 
+            self.publish(self.mqtt_topic_gas, self.lg) 
             
         if self.le != self.e:
             self.le = self.e
-            self.mqtt_client.publish(self.mqtt_topic_electricity, self.le, self.QoS, self.retain) 
+            self.publish(self.mqtt_topic_electricity, self.le) 
             
             
     def update_hour(self, hour):
@@ -80,16 +96,16 @@ class PROCESS_ALL(object):
         self.h_g[hour] = self.g if hour == 0 else self.g - self.h_g[hour - 1]
         self.h_e[hour] = self.e if hour == 0 else self.e - self.h_e[hour - 1]        
         
-        self.mqtt_client.publish(self.mqtt_topic_water       + '/' + str(hour), self.h_w[hour], self.QoS, self.retain)    
-        self.mqtt_client.publish(self.mqtt_topic_gas         + '/' + str(hour), self.h_g[hour], self.QoS, self.retain)    
-        self.mqtt_client.publish(self.mqtt_topic_electricity + '/' + str(hour), self.h_e[hour], self.QoS, self.retain) 
+        self.publish(self.mqtt_topic_water       + '/' + str(hour), self.h_w[hour])    
+        self.publish(self.mqtt_topic_gas         + '/' + str(hour), self.h_g[hour])    
+        self.publish(self.mqtt_topic_electricity + '/' + str(hour), self.h_e[hour]) 
 
 
     def clear_mqtt_data(self):
         for h in range(1, 24): # Do not clear 1st-hour data (00:00-01:00)
-            self.mqtt_client.publish(self.mqtt_topic_water       + '/' + str(h), 0,   self.QoS, self.retain)    
-            self.mqtt_client.publish(self.mqtt_topic_gas         + '/' + str(h), 0.0, self.QoS, self.retain)    
-            self.mqtt_client.publish(self.mqtt_topic_electricity + '/' + str(h), 0.0, self.QoS, self.retain)    
+            self.publish(self.mqtt_topic_water       + '/' + str(h), 0, )    
+            self.publish(self.mqtt_topic_gas         + '/' + str(h), 0.0)    
+            self.publish(self.mqtt_topic_electricity + '/' + str(h), 0.0)    
             time.sleep(0.01) # Is needed?
 
 
@@ -127,6 +143,7 @@ class PROCESS_ALL(object):
         except (KeyboardInterrupt, SystemExit, Exception) as e:
             print "Exit...", e
             self.mqtt_client.loop_stop()
+            self.mqtt_client.disconnect()
             
         
 if __name__ == '__main__':
