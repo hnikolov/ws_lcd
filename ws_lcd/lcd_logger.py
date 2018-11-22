@@ -82,7 +82,15 @@ class MQTT_LOGGER():
 
         self.my_gui.update_eur_total()
 
-
+    def connect(self):
+        self.mqtt_client.loop_stop() # Stop also auto reconnects
+        self.mqtt_client.connect(MQTT_SERVER, 1883, 60)
+        self.mqtt_client.loop_start()
+        while not self.connected:
+            print "Connecting..."
+            time.sleep(1)
+            
+            
     def display_next(self):
         self.my_gui.layout_next()
 
@@ -91,18 +99,21 @@ class MQTT_LOGGER():
 
     def run(self):
         try:
-            self.mqtt_client.loop_start()
+            self.connect()
             while True:
-                self.my_gui.set_date_time()
-                for i in range(5):
-                    self.my_gui.update_display() # Updated only when data has changed
-                    time.sleep(1)
+                if self.connected == False:
+                    self.connect() # We should not need this
+                else:
+                    self.my_gui.set_date_time()
+                    for i in range(5):
+                        self.my_gui.update_display() # Updated only when data has changed
+                        time.sleep(1)
 
-                self.my_gui.layout_next()
-                for i in range(5):
-                    self.my_gui.update_display() # Updated only when data has changed
-                    time.sleep(1)
-                self.my_gui.layout_next()
+                    self.my_gui.layout_next()
+                    for i in range(5):
+                        self.my_gui.update_display() # Updated only when data has changed
+                        time.sleep(1)
+                    self.my_gui.layout_next()
 
         except (KeyboardInterrupt, SystemExit, Exception) as e:
             print "Exit...", e

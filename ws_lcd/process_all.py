@@ -2,11 +2,11 @@
 import paho.mqtt.client as mqtt
 import time
 
-import RPi.GPIO as GPIO
-GPIO.setmode(GPIO.BCM)
-PIN_LED   = 26
-def led_on():  GPIO.output(PIN_LED, True)
-def led_off(): GPIO.output(PIN_LED, False)
+#import RPi.GPIO as GPIO
+#GPIO.setmode(GPIO.BCM)
+#PIN_LED   = 26
+def led_on():  pass #print "led on\n"  # GPIO.output(PIN_LED, True)
+def led_off(): pass #print "led off\n" # GPIO.output(PIN_LED, False)
     
 MQTT_SERVER = "192.168.2.100"
 
@@ -16,8 +16,10 @@ class PROCESS_ALL(object):
         self.h_g = [0.0] * 24
         self.h_e = [0.0] * 24
 
-        self.hour  = int(time.strftime('%H'))
+        self.hour  = int(time.strftime('%M'))%24
         self.sdate = time.strftime('%d-%b-%y')
+        
+        self.cleared_mqtt = False
         
         self.w  = 0   # Updated (+1) by irq
         self.lw = 0   # Last sent water
@@ -77,7 +79,7 @@ class PROCESS_ALL(object):
         led_on()
         self.mqtt_client.publish(topic, data, self.QoS, self.retain)
         
-    def update_data():
+    def update_data(self):
         if self.lw != self.w:
             self.lw = self.w
             self.publish(self.mqtt_topic_water, self.lw) 
@@ -116,6 +118,17 @@ class PROCESS_ALL(object):
             for h, (w, g, e) in enumerate(zip(self.h_w, self.h_g, self.h_e)):
                 fp.write(','.join(['\n'+str(h), str(w), str(g), str(e)]))      
 
+    def clear_data(self):
+        for i in range(24):
+            self.h_w[i] = 0
+            self.h_g[i] = 0.0
+            self.h_e[i] = 0.0
+            self.w  = 0   # Updated (+1) by irq
+            self.lw = 0   # Last sent water
+            self.g  = 0.0 # Updated (+0.01) by irq  
+            self.lg = 0.0 # Last sent gas
+            self.e  = 0.0 # Updated (+0.001) by irq
+            self.le = 0.0 # Last sent electricity
     
     def run(self):
         try:
@@ -126,18 +139,31 @@ class PROCESS_ALL(object):
                 else:
                     self.update_data()
                                 
-                    if int(time.strftime('%H')) != self.hour:                        
-                        self.update_hour(self.hour)
-                        self.hour = int(time.strftime('%H'))
+                    if int(time.strftime('%M'))%24 != self.hour:                        
+                        self.update_hour(self.hour%24)
+                        self.hour = int(time.strftime('%M'))%24
                                         
-                    if self.hour == 1: # New day 01:00 - clear data
-                        self.clear_mqtt_data()                  
+                    if self.hour == 1 and self.cleared_mqtt == False: # New day 01:00 - clear data
+                        self.clear_mqtt_data()
+                        self.cleared_mqtt = True                        
 
                     if time.strftime('%d-%b-%y') != self.sdate: # New day
                         # TODO: clear data (w, lw, etc.)?
                         self.write_file()
+                        self.clear_data()
+                        self.cleared_mqtt = False
                         self.sdate = time.strftime('%d-%b-%y')
                     
+                    time.sleep(1)
+                    
+                    self.e += 0.001
+                    time.sleep(1)
+                    self.g += 0.01
+                    self.e += 0.001
+                    time.sleep(1)
+                    self.w += 1
+                    self.g += 0.01
+                    self.e += 0.001
                     time.sleep(1)
 
         except (KeyboardInterrupt, SystemExit, Exception) as e:
