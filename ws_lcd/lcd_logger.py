@@ -122,12 +122,14 @@ class MQTT_LOGGER():
 
     def run_1(self):
         try:
-            # Where to update the time?
-            self.mqtt_client.loop_start()
+            self.connect()
             while True:
-                self.my_gui.set_date_time()
-                self.my_gui.update_display() # Updated only when data has changed
-                time.sleep(1)
+                if self.connected == False:
+                    self.connect() # We should not need this
+                else:
+                    self.my_gui.set_date_time()
+                    self.my_gui.update_display() # Updated only when data has changed
+                    time.sleep(1)
 
         except (KeyboardInterrupt, SystemExit, Exception) as e:
             print "Exit...", e
