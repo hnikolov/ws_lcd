@@ -79,8 +79,6 @@ def backlight_toggle():
 # ============================================================================================
 if __name__ == '__main__':
 
-    myApp = MQTT_LOGGER(WS=True)
-
     GPIO.add_event_detect(KEY_1,  GPIO.FALLING, callback = cbk_key_1,  bouncetime = 300)
     GPIO.add_event_detect(KEY_2,  GPIO.FALLING, callback = cbk_key_2,  bouncetime = 300)
     GPIO.add_event_detect(KEY_3,  GPIO.FALLING, callback = cbk_key_3,  bouncetime = 300)
