@@ -10,7 +10,9 @@ MQTT_SERVER = "192.168.2.100"
 class MQTT_LOGGER():
     """ Send data via mqtt... """
     def __init__(self, WS = False):
-        self.dconn = 0
+        self.connected = False
+        self.dconn     = 0
+
         self.mqtt_topic_electricity     = "power_meter/electricity"
         self.mqtt_topic_temperature     = "power_meter/temperature"
         self.mqtt_topic_water           = "power_meter/water"
