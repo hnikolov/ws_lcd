@@ -24,13 +24,15 @@ class PROCESS_ALL(object):
         
         self.cleared_mqtt = False
         
-        self.w  = 0   # Updated (+1) by irq
-        self.lw = 0   # Last sent water
+        self.w   = 0   # Updated (+1) by irq
+        self.lw  = 0   # Last sent water
         self.phw = 0   # Previous hour water
-        self.g  = 0.0 # Updated (+0.01) by irq  
-        self.lg = 0.0 # Last sent gas
-        self.e  = 0.0 # Updated (+0.001) by irq
-        self.le = 0.0 # Last sent electricity
+        self.g   = 0.0 # Updated (+0.01) by irq  
+        self.lg  = 0.0 # Last sent gas
+        self.phg = 0.0 # Previous hour gas
+        self.e   = 0.0 # Updated (+0.001) by irq
+        self.le  = 0.0 # Last sent electricity
+        self.phe = 0.0 # Previous hour electricity
 
         self.connected = False
         self.dconn     = 0
@@ -98,9 +100,17 @@ class PROCESS_ALL(object):
             
             
     def update_hour(self, hour):
-        self.h_w[hour] = self.w if hour == 0 else self.w - self.h_w[hour - 1]
-        self.h_g[hour] = self.g if hour == 0 else self.g - self.h_g[hour - 1]
-        self.h_e[hour] = self.e if hour == 0 else self.e - self.h_e[hour - 1]        
+        # self.h_w[hour] = self.w if hour == 0 else self.w - self.h_w[hour - 1]
+        # self.h_g[hour] = self.g if hour == 0 else self.g - self.h_g[hour - 1]
+        # self.h_e[hour] = self.e if hour == 0 else self.e - self.h_e[hour - 1]        
+        
+        self.h_w[hour] = self.w - self.phw
+        self.h_g[hour] = self.g - self.phg
+        self.h_e[hour] = self.e - self.phe
+
+        self.phw = self.w        
+        self.phg = self.g
+        self.phe = self.e
         
         self.publish(self.mqtt_topic_water       + '/' + str(hour), self.h_w[hour])    
         self.publish(self.mqtt_topic_gas         + '/' + str(hour), self.h_g[hour])    
@@ -128,12 +138,15 @@ class PROCESS_ALL(object):
             self.h_g[i] = 0.0
             self.h_e[i] = 0.0
 
-        self.w  = 0   # Updated (+1) by irq
-        self.lw = 0   # Last sent water
-        self.g  = 0.0 # Updated (+0.01) by irq  
-        self.lg = 0.0 # Last sent gas
-        self.e  = 0.0 # Updated (+0.001) by irq
-        self.le = 0.0 # Last sent electricity
+        self.w   = 0   # Updated (+1) by irq
+        self.lw  = 0   # Last sent water
+        self.phw = 0   # Previous hour water
+        self.g   = 0.0 # Updated (+0.01) by irq  
+        self.lg  = 0.0 # Last sent gas
+        self.phg = 0.0 # Previous hour gas
+        self.e   = 0.0 # Updated (+0.001) by irq
+        self.le  = 0.0 # Last sent electricity
+        self.phe = 0.0 # Previous electricity
     
     def run(self):
         try:
