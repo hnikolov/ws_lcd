@@ -87,7 +87,7 @@ class MQTT_LOGGER():
         self.mqtt_client.connect(MQTT_SERVER, 1883, 60)
         self.mqtt_client.loop_start()
         while not self.connected:
-            print "Connecting..."
+#            print "Connecting..."
             time.sleep(1)
             
             
