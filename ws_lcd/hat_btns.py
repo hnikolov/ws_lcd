@@ -88,5 +88,5 @@ if __name__ == '__main__':
     GPIO.add_event_detect(JSK_RT, GPIO.FALLING, callback = cbk_jsk_rt, bouncetime = 300)
     GPIO.add_event_detect(JSK_PS, GPIO.FALLING, callback = cbk_jsk_ps, bouncetime = 300)
 
-    backlight_off()
+#    backlight_off()
     myApp.run()
