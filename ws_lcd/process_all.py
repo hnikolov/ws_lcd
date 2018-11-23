@@ -1,43 +1,48 @@
 #!/usr/bin/python
+""" This implementation combines 5 python applications:
+    - irq water -> send mqtt
+    - irq gas   -> send mqtt
+    - irq electricity -> send mqtt
+    - receive mqtt -> process hour -> send mqtt
+    - receive mqtt -> store to file once a day
+    It was needed due to strange disconnects 
+    (probably caused by the same MAC/IP address?)
+"""
 import paho.mqtt.client as mqtt
 import time
 
+from irq_data import IRQ_DATA
+
+# TODO: To be moved to irq_mqtt_a
 import RPi.GPIO as GPIO
 GPIO.setmode(GPIO.BCM)
 
 PIN_LED = 26
-GPIO.setup(PIN_LED,   GPIO.OUT)
+GPIO.setup(PIN_LED, GPIO.OUT)
 
 def led_on():  GPIO.output(PIN_LED, True)
 def led_off(): GPIO.output(PIN_LED, False)
+# def led_on():  pass # default implementation
+# def led_off(): pass # default implementation
+# but we need self.led_on = led_on...
+# ------------------------------------------
 
 MQTT_SERVER = "192.168.2.100"
 
 class PROCESS_ALL(object):
     def __init__(self):
-        self.h_w = [0]   * 24
-        self.h_g = [0.0] * 24
-        self.h_e = [0.0] * 24
+        self.w = IRQ_DATA(self.mqtt_topic_water,       0)
+        self.g = IRQ_DATA(self.mqtt_topic_gas,         0.0)
+        self.e = IRQ_DATA(self.mqtt_topic_electricity, 0.0)
 
         self.hour  = int(time.strftime('%H'))
         self.sdate = time.strftime('%d-%b-%y')
-
+        
+        self.connected    = False
+        self.dconn        = 0
+        self.QoS          = 0 # or 2?
+        self.retain       = True
         self.cleared_mqtt = False
-
-        self.w   = 0   # Updated (+1) by irq
-        self.lw  = 0   # Last sent water
-        self.phw = 0   # Previous hour water
-        self.g   = 0.0 # Updated (+0.01) by irq  
-        self.lg  = 0.0 # Last sent gas
-        self.phg = 0.0 # Previous hour gas
-        self.e   = 0.0 # Updated (+0.001) by irq
-        self.le  = 0.0 # Last sent electricity
-        self.phe = 0.0 # Previous hour electricity
-
-        self.connected = False
-        self.dconn     = 0
-        self.QoS       = 0 # or 2?
-        self.retain    = True
 
         self.mqtt_topic_water       = "power_meter/water"
         self.mqtt_topic_gas         = "power_meter/gas"
@@ -73,49 +78,41 @@ class PROCESS_ALL(object):
     # ===============================================================================
 
     def connect(self):
-        led_on()
-        self.mqtt_client.loop_stop() # Stop also auto reconnects
-        self.mqtt_client.connect(MQTT_SERVER, 1883, 60)
-        self.mqtt_client.loop_start()
-        while not self.connected:
-#            print "Connecting..."
-            time.sleep(1)
-
+        try:
+            led_on()
+            self.mqtt_client.loop_stop() # Stop also auto reconnects
+            self.mqtt_client.connect(MQTT_SERVER, 1883, 60)
+            self.mqtt_client.loop_start()
+            while not self.connected:
+                time.sleep(1)
+        except Exception as e:
+            print e
+            time.sleep(2)
+                
     def publish(self, topic, data):
         led_on()
         self.mqtt_client.publish(topic, data, self.QoS, self.retain)
         time.sleep(0.01)
 
     def update_data(self):
-        if self.lw != self.w:
-            self.lw = self.w
-            self.publish(self.mqtt_topic_water, self.lw)
-
-        if self.lg != self.g:
-            self.lg = self.g
-            self.publish(self.mqtt_topic_gas, self.lg)
-
-        if self.le != self.e:
-            self.le = self.e
-            self.publish(self.mqtt_topic_electricity, self.le)
+        if self.w.update_data() == True:
+            self.publish(self.mqtt_topic_water, self.w.get())
+            
+        if self.g.update_data() == True:
+            self.publish(self.mqtt_topic_gas, self.g.get())
+            
+        if self.e.update_data() == True:
+            self.publish(self.mqtt_topic_electricity, self.e.get())
 
 
     def update_hour(self, hour):
-        # self.h_w[hour] = self.w if hour == 0 else self.w - self.h_w[hour - 1]
-        # self.h_g[hour] = self.g if hour == 0 else self.g - self.h_g[hour - 1]
-        # self.h_e[hour] = self.e if hour == 0 else self.e - self.h_e[hour - 1]
+        self.w.update_hour(hour)
+        self.g.update_hour(hour)
+        self.e.update_hour(hour)
 
-        self.h_w[hour] = self.w - self.phw
-        self.h_g[hour] = self.g - self.phg
-        self.h_e[hour] = self.e - self.phe
-
-        self.phw = self.w
-        self.phg = self.g
-        self.phe = self.e
-
-        self.publish(self.mqtt_topic_water       + '/' + str(hour), self.h_w[hour])
-        self.publish(self.mqtt_topic_gas         + '/' + str(hour), self.h_g[hour])
-        self.publish(self.mqtt_topic_electricity + '/' + str(hour), self.h_e[hour])
+        self.publish(self.mqtt_topic_water       + '/' + str(hour), self.w.get(hour)
+        self.publish(self.mqtt_topic_gas         + '/' + str(hour), self.g.get(hour)
+        self.publish(self.mqtt_topic_electricity + '/' + str(hour), self.e.get(hour)
 
 
     def clear_mqtt_data(self):
@@ -130,23 +127,8 @@ class PROCESS_ALL(object):
         with open(file_name, 'w') as fp:
             fp.write(self.sdate + ', W, G, E')
             for h, (w, g, e) in enumerate(zip(self.h_w, self.h_g, self.h_e)):
-                fp.write(','.join(['\n'+str(h), str(w), str(g), str(e)]))
+                fp.write(','.join(['\n'+str(h), str(w), str(g), str(e)])) 
 
-    def clear_data(self):
-        for i in range(24):
-            self.h_w[i] = 0
-            self.h_g[i] = 0.0
-            self.h_e[i] = 0.0
-
-        self.w   = 0   # Updated (+1) by irq
-        self.lw  = 0   # Last sent water
-        self.phw = 0   # Previous hour water
-        self.g   = 0.0 # Updated (+0.01) by irq
-        self.lg  = 0.0 # Last sent gas
-        self.phg = 0.0 # Previous hour gas
-        self.e   = 0.0 # Updated (+0.001) by irq
-        self.le  = 0.0 # Last sent electricity
-        self.phe = 0.0 # Previous electricity
 
     def run(self):
         try:
@@ -167,7 +149,9 @@ class PROCESS_ALL(object):
 
                     if time.strftime('%d-%b-%y') != self.sdate: # New day
                         self.write_file()
-                        self.clear_data()
+                        self.w.clear_data()    
+                        self.g.clear_data()    
+                        self.e.clear_data() 
                         self.cleared_mqtt = False
                         self.sdate = time.strftime('%d-%b-%y')
 
