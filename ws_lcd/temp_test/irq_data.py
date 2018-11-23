@@ -10,11 +10,9 @@ class IRQ_DATA(object):
 
         self.default = default # 0 or 0.0
 
-
     def add(self, value):
         self.w += value
-
-
+        
     def update_data(self):
         if self.lw != self.w:
             self.lw = self.w

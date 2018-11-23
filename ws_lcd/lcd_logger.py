@@ -85,28 +85,32 @@ class MQTT_LOGGER():
 #            print st[:-3],  ":", msg.topic, ":", msg.payload
 
         self.my_gui.update_eur_total()
+    # ===============================================================================
 
-    def connect(self):
-        self.mqtt_client.loop_stop() # Stop also auto reconnects
-        self.mqtt_client.connect(MQTT_SERVER, 1883, 60)
-        self.mqtt_client.loop_start()
-        while not self.connected:
-#            print "Connecting..."
-            time.sleep(1)
-            
-            
+     def connect(self):
+        try:
+            self.mqtt_client.loop_stop() # Stop also auto reconnects
+            self.mqtt_client.connect(MQTT_SERVER, 1883, 60)
+            self.mqtt_client.loop_start()
+            while not self.connected:
+                time.sleep(1)
+        except Exception as e:
+            print e
+            time.sleep(2)
+
+
     def display_next(self):
         self.my_gui.layout_next()
 
     def display_prev(self):
         self.my_gui.layout_prev()
 
-    def run(self):
+    def run_no_buttons(self):
         try:
             self.connect()
             while True:
                 if self.connected == False:
-                    self.connect() # We should not need this
+                    self.connect()
                 else:
                     self.my_gui.set_date_time()
                     for i in range(5):
@@ -122,14 +126,15 @@ class MQTT_LOGGER():
         except (KeyboardInterrupt, SystemExit, Exception) as e:
             print "Exit...", e
             self.mqtt_client.loop_stop()
+            self.mqtt_client.disconnect()
             self.my_gui.lcd.close()
 
-    def run_1(self):
+    def run(self):
         try:
             self.connect()
             while True:
                 if self.connected == False:
-                    self.connect() # We should not need this
+                    self.connect()
                 else:
                     self.my_gui.set_date_time()
                     self.my_gui.update_display() # Updated only when data has changed
@@ -144,5 +149,5 @@ class MQTT_LOGGER():
 # ============================================================================================
 if __name__ == '__main__':
     myApp = MQTT_LOGGER(WS=True)
-    myApp.run()
+    myApp.run_no_buttons()
 

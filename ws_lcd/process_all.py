@@ -13,30 +13,22 @@ import time
 
 from irq_data import IRQ_DATA
 
-# TODO: To be moved to irq_mqtt_a
-import RPi.GPIO as GPIO
-GPIO.setmode(GPIO.BCM)
-
-PIN_LED = 26
-GPIO.setup(PIN_LED, GPIO.OUT)
-
-def led_on():  GPIO.output(PIN_LED, True)
-def led_off(): GPIO.output(PIN_LED, False)
-# def led_on():  pass # default implementation
-# def led_off(): pass # default implementation
-# but we need self.led_on = led_on...
-# ------------------------------------------
+def led_on():  print 'default', # default implementation
+def led_off(): print '\n'
 
 MQTT_SERVER = "192.168.2.100"
 
 class PROCESS_ALL(object):
     def __init__(self):
-        self.w = IRQ_DATA(self.mqtt_topic_water,       0)
-        self.g = IRQ_DATA(self.mqtt_topic_gas,         0.0)
-        self.e = IRQ_DATA(self.mqtt_topic_electricity, 0.0)
+        self.w = IRQ_DATA(0)
+        self.g = IRQ_DATA(0.0)
+        self.e = IRQ_DATA(0.0)
 
         self.hour  = int(time.strftime('%H'))
         self.sdate = time.strftime('%d-%b-%y')
+        
+        self.led_on  = led_on
+        self.led_off = led_off
         
         self.connected    = False
         self.dconn        = 0
@@ -62,7 +54,7 @@ class PROCESS_ALL(object):
         if rc == 0:
             self.connected = True
             print "Connected to: " + MQTT_SERVER
-            led_off()
+            self.led_off()
             self.mqtt_client.publish(self.mqtt_topic_last_will, "online, " + str(self.dconn), self.QoS, self.retain)
         print "Result code:", rc
 
@@ -71,15 +63,15 @@ class PROCESS_ALL(object):
         print "Disconnected:", msg
         self.connected = False
         self.dconn    += 1
-        led_off()
+        self.led_off()
 
     def on_publish(self, client, userdata, mid):
-        led_off()
+        self.led_off()
     # ===============================================================================
 
     def connect(self):
         try:
-            led_on()
+            self.led_on()
             self.mqtt_client.loop_stop() # Stop also auto reconnects
             self.mqtt_client.connect(MQTT_SERVER, 1883, 60)
             self.mqtt_client.loop_start()
@@ -90,7 +82,7 @@ class PROCESS_ALL(object):
             time.sleep(2)
                 
     def publish(self, topic, data):
-        led_on()
+        self.led_on()
         self.mqtt_client.publish(topic, data, self.QoS, self.retain)
         time.sleep(0.01)
 
@@ -110,9 +102,9 @@ class PROCESS_ALL(object):
         self.g.update_hour(hour)
         self.e.update_hour(hour)
 
-        self.publish(self.mqtt_topic_water       + '/' + str(hour), self.w.get(hour)
-        self.publish(self.mqtt_topic_gas         + '/' + str(hour), self.g.get(hour)
-        self.publish(self.mqtt_topic_electricity + '/' + str(hour), self.e.get(hour)
+        self.publish(self.mqtt_topic_water       + '/' + str(hour), self.w.get(hour))
+        self.publish(self.mqtt_topic_gas         + '/' + str(hour), self.g.get(hour))
+        self.publish(self.mqtt_topic_electricity + '/' + str(hour), self.e.get(hour))
 
 
     def clear_mqtt_data(self):
@@ -135,7 +127,7 @@ class PROCESS_ALL(object):
             self.connect()
             while True:
                 if self.connected == False:
-                    self.connect() # We should not need this
+                    self.connect()
                 else:
                     self.update_data()
 
