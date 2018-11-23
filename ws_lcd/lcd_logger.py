@@ -87,16 +87,16 @@ class MQTT_LOGGER():
         self.my_gui.update_eur_total()
     # ===============================================================================
 
-     def connect(self):
-        try:
-            self.mqtt_client.loop_stop() # Stop also auto reconnects
-            self.mqtt_client.connect(MQTT_SERVER, 1883, 60)
-            self.mqtt_client.loop_start()
-            while not self.connected:
-                time.sleep(1)
-        except Exception as e:
-            print e
-            time.sleep(2)
+    def connect(self):
+       try:
+           self.mqtt_client.loop_stop() # Stop also auto reconnects
+           self.mqtt_client.connect(MQTT_SERVER, 1883, 60)
+           self.mqtt_client.loop_start()
+           while not self.connected:
+               time.sleep(1)
+       except Exception as e:
+           print e
+           time.sleep(2)
 
 
     def display_next(self):
