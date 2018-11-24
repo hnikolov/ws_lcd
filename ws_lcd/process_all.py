@@ -26,10 +26,10 @@ class PROCESS_ALL(object):
 
         self.hour  = int(time.strftime('%H'))
         self.sdate = time.strftime('%d-%b-%y')
-        
+
         self.led_on  = led_on
         self.led_off = led_off
-        
+
         self.connected    = False
         self.dconn        = 0
         self.QoS          = 0 # or 2?
@@ -80,7 +80,7 @@ class PROCESS_ALL(object):
         except Exception as e:
             print e
             time.sleep(2)
-                
+
     def publish(self, topic, data):
         self.led_on()
         self.mqtt_client.publish(topic, data, self.QoS, self.retain)
@@ -89,10 +89,10 @@ class PROCESS_ALL(object):
     def update_data(self):
         if self.w.update_data() == True:
             self.publish(self.mqtt_topic_water, self.w.get())
-            
+
         if self.g.update_data() == True:
             self.publish(self.mqtt_topic_gas, self.g.get())
-            
+
         if self.e.update_data() == True:
             self.publish(self.mqtt_topic_electricity, self.e.get())
 
@@ -141,9 +141,9 @@ class PROCESS_ALL(object):
 
                     if time.strftime('%d-%b-%y') != self.sdate: # New day
                         self.write_file()
-                        self.w.clear_data()    
-                        self.g.clear_data()    
-                        self.e.clear_data() 
+                        self.w.clear_data()
+                        self.g.clear_data()
+                        self.e.clear_data()
                         self.cleared_mqtt = False
                         self.sdate = time.strftime('%d-%b-%y')
 
@@ -153,7 +153,6 @@ class PROCESS_ALL(object):
             print "Exit...", e
             self.mqtt_client.loop_stop()
             self.mqtt_client.disconnect()
-            GPIO.cleanup()
 
 
 if __name__ == '__main__':
