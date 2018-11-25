@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import time
 
+
 class IRQ_DATA(object):
     def __init__(self, default):
         self.h_v = [default] * 24 # Per hour
@@ -10,9 +11,11 @@ class IRQ_DATA(object):
 
         self.default = default # 0 or 0.0
 
+
     def add(self, value):
         self.v += value
         
+
     def update_data(self):
         if self.lv != self.v:
             self.lv = self.v
@@ -27,11 +30,11 @@ class IRQ_DATA(object):
 
     def clear_data(self):
         for i in range(24):
-            self.h_v[i] = default
+            self.h_v[i] = self.default
 
-        self.v   = default # Updated by irq
-        self.lv  = default # Last sent
-        self.phv = default # Previous hour total
+        self.v   = self.default # Updated by irq
+        self.lv  = self.default # Last sent
+        self.phv = self.default # Previous hour total
 
 
     def get(self, hour = None):

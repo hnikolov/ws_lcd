@@ -106,9 +106,9 @@ class PROCESS_ALL(object):
                 if self.hour == 0 and self.new_day == False:
                     self.new_day = True
                     self.write_file()
-                    self.w.clear_data()    
-                    self.g.clear_data()    
-                    self.e.clear_data() 
+                    self.w.clear_data()
+                    self.g.clear_data()
+                    self.e.clear_data()
                     self.cleared_mqtt = False
                     self.sdate = time.strftime('%d-%b-%y')
                     print self.hour
