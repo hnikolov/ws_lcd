@@ -22,7 +22,8 @@ class PROCESS_ALL(object):
         self.g = IRQ_DATA(0.0)
         self.e = IRQ_DATA(0.0)
 
-        self.hour  = int(time.strftime('%H'))
+        self.hour  = int(time.strftime('%M'))%24
+#        self.hour  = int(time.strftime('%H'))
         self.sdate = time.strftime('%d-%b-%y')
         
         self.mqtt_topic_water       = "power_meter/water"
@@ -30,6 +31,9 @@ class PROCESS_ALL(object):
         self.mqtt_topic_electricity = "power_meter/electricity"
         self.mqtt_topic_last_will   = "power_meter/status/A"
 
+        self.cleared_mqtt = True
+        self.new_day      = False
+        
         self.led_on  = led_on
         self.led_off = led_off
         
@@ -81,21 +85,31 @@ class PROCESS_ALL(object):
                 self.update_data()
                 self.update_data() # Extra call, no update expected
 
-                if int(time.strftime('%H')) != self.hour:
-                    self.update_hour(self.hour)
-                    self.hour = int(time.strftime('%H'))
+                if int(time.strftime('%M'))%24 != self.hour:
+                    self.update_hour(self.hour%24)
+                    self.hour = int(time.strftime('%M'))%24
+                    print self.hour , "-------------------"
+
+                # if int(time.strftime('%H')) != self.hour:
+                    # self.update_hour(self.hour)
+                    # self.hour = int(time.strftime('%H'))
 
                 if self.hour == 1 and self.cleared_mqtt == False: # New day 01:00 - clear mqtt data
                     self.clear_mqtt_data()
                     self.cleared_mqtt = True
+                    self.new_day = False
+                    print self.hour
 
-                if time.strftime('%d-%b-%y') != self.sdate: # New day
+#                if time.strftime('%d-%b-%y') != self.sdate: # New day
+                if self.hour == 0 and self.new_day == False:
+                    self.new_day = True
                     self.write_file()
                     self.w.clear_data()    
                     self.g.clear_data()    
                     self.e.clear_data() 
                     self.cleared_mqtt = False
                     self.sdate = time.strftime('%d-%b-%y')
+                    print self.hour
 
                 time.sleep(1)
                 self.w.add( 1 )
