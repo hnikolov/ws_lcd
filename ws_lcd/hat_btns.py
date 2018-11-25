@@ -4,7 +4,7 @@ from lcd_logger import MQTT_LOGGER
 myApp = MQTT_LOGGER(WS=True)
 
 class G():
-    BACKLIGHT = False
+    BACKLIGHT = True
 
 import RPi.GPIO as GPIO
 #GPIO.setmode(GPIO.BCM)
