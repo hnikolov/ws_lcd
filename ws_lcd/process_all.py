@@ -118,8 +118,8 @@ class PROCESS_ALL(object):
         file_name = self.sdate + '.csv'
         with open(file_name, 'w') as fp:
             fp.write(self.sdate + ', W, G, E')
-            for h, (w, g, e) in enumerate(zip(self.h_w, self.h_g, self.h_e)):
-                fp.write(','.join(['\n'+str(h), str(w), str(g), str(e)])) 
+            for h in range(24):
+                fp.write(','.join(['\n'+str(h), str(self.w.get(h)), str(self.g.get(h)), str(self.e.get(h))]))
 
 
     def run(self):
