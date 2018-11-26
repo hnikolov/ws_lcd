@@ -11,8 +11,8 @@ MQTT_SERVER = "192.168.2.100"
 class MQTT_LOGGER():
     """ Send data via mqtt... """
     def __init__(self, WS = False):
-        self.L = LOG()
-        
+        self.L = LOG(False)
+
         self.connected = False
         self.dconn     = 0
 
@@ -36,8 +36,10 @@ class MQTT_LOGGER():
         self.my_gui = MY_GUI(WS)
 
     # MQTT handler ===============================================================================
-    def on_log(client, userdata, level, buf):
-        self.L.log( buf )
+    def on_log(self, client, userdata, level, buf):
+        if "PUBLISH" not in buf:
+            self.L.log( buf )
+
         if "PINGRESP" in buf:
             self.connected = True
 
@@ -57,7 +59,7 @@ class MQTT_LOGGER():
 
     def on_disconnect(self, client, userdata, msg):
         """ The callback for when disconnect from the server. """
-        self.L.log("Disconnected: " + msg)
+        self.L.log("Disconnected: " + str(msg))
         self.connected = False
         self.dconn    += 1
 
@@ -98,16 +100,15 @@ class MQTT_LOGGER():
 
     def connect(self):
         try:
-            self.led_on()
-            self.mqtt_client.loop_stop() # Stop also auto reconnects
-            self.mqtt_client.connect(MQTT_SERVER, 1883, 60)
-            self.mqtt_client.loop_start()
             while not self.connected:
-                time.sleep(2)
+                self.mqtt_client.loop_stop() # Stop also auto reconnects
+                self.mqtt_client.connect(MQTT_SERVER, 1883, 60)
+                self.mqtt_client.loop_start()
+                time.sleep(10)
 
         except Exception:
             self.L.log(traceback.format_exc())
-            time.sleep(4)           
+            time.sleep(10)
 
     def display_next(self):
         self.my_gui.layout_next()

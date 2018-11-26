@@ -55,7 +55,9 @@ class PROCESS_ALL(object):
 
     # MQTT handler ===============================================================================
     def on_log(self, client, userdata, level, buf):
-        self.L.log(buf)
+        if "PUBLISH" not in buff:
+            self.L.log(buf)
+
         if "PINGRESP" in buf:
             self.connected = True
             self.led_on()
@@ -87,11 +89,11 @@ class PROCESS_ALL(object):
                 self.mqtt_client.loop_stop() # Stop also auto reconnects
                 self.mqtt_client.connect(MQTT_SERVER, 1883, 60)
                 self.mqtt_client.loop_start()
-                time.sleep(6)
+                time.sleep(10)
 
         except Exception:
             self.L.log(traceback.format_exc())
-            time.sleep(6)
+            time.sleep(10)
 
     def publish(self, topic, data):
         self.led_on()
