@@ -55,7 +55,7 @@ class PROCESS_ALL(object):
 
     # MQTT handler ===============================================================================
     def on_log(self, client, userdata, level, buf):
-        if "PUBLISH" not in buff:
+        if "PUBLISH" not in buf:
             self.L.log(buf)
 
         if "PINGRESP" in buf:
