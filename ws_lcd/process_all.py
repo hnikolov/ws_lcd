@@ -5,7 +5,7 @@
     - irq electricity -> send mqtt
     - receive mqtt -> process hour -> send mqtt
     - receive mqtt -> store to file once a day
-    It was needed due to strange disconnects 
+    It was needed due to strange disconnects
     (probably caused by the same MAC/IP address?)
 """
 import paho.mqtt.client as mqtt
@@ -58,6 +58,7 @@ class PROCESS_ALL(object):
         self.L.log(buf)
         if "PINGRESP" in buf:
             self.connected = True
+            self.led_on()
 
     def on_connect(self, client, userdata, flags, rc):
         if rc == 0:
@@ -80,16 +81,17 @@ class PROCESS_ALL(object):
 
     def connect(self):
         try:
-            self.led_on()
-            self.mqtt_client.loop_stop() # Stop also auto reconnects
-            self.mqtt_client.connect(MQTT_SERVER, 1883, 60)
-            self.mqtt_client.loop_start()
             while not self.connected:
-                time.sleep(2)
+                self.led_on()
+                self.L.log("Connecting...")
+                self.mqtt_client.loop_stop() # Stop also auto reconnects
+                self.mqtt_client.connect(MQTT_SERVER, 1883, 60)
+                self.mqtt_client.loop_start()
+                time.sleep(6)
 
         except Exception:
             self.L.log(traceback.format_exc())
-            time.sleep(4)
+            time.sleep(6)
 
     def publish(self, topic, data):
         self.led_on()
