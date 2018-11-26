@@ -9,15 +9,20 @@
     (probably caused by the same MAC/IP address?)
 """
 import time
+import traceback
 
+from log import LOG
 from irq_data import IRQ_DATA
 
+    
 def led_on():  print 'default', # default implementation
 def led_off(): print '\n' # default implementation
 
 
 class PROCESS_ALL(object):
     def __init__(self):
+        self.L = LOG()
+        
         self.w = IRQ_DATA(0)
         self.g = IRQ_DATA(0.0)
         self.e = IRQ_DATA(0.0)
@@ -42,6 +47,7 @@ class PROCESS_ALL(object):
         time.sleep(0.01)
         print data,
         self.led_off()
+        self.L.log( data )
 
     def update_data(self):
         if self.w.update_data() == True:
@@ -89,7 +95,7 @@ class PROCESS_ALL(object):
                 if int(time.strftime('%M'))%24 != self.hour:
                     self.update_hour(self.hour%24)
                     self.hour = int(time.strftime('%M'))%24
-                    print self.hour , "-------------------"
+                    self.L.log(str(self.hour) + " -------------------")
                     self.write_file()
 
                 # if int(time.strftime('%H')) != self.hour:
@@ -100,7 +106,7 @@ class PROCESS_ALL(object):
                     self.clear_mqtt_data()
                     self.cleared_mqtt = True
                     self.new_day = False
-                    print self.hour
+                    self.L.log(self.hour)
 
 #                if time.strftime('%d-%b-%y') != self.sdate: # New day
                 if self.hour == 0 and self.new_day == False:
@@ -111,7 +117,7 @@ class PROCESS_ALL(object):
                     self.e.clear_data()
                     self.cleared_mqtt = False
                     self.sdate = time.strftime('%d-%b-%y')
-                    print self.hour
+                    self.L.log(self.hour)
 
                 time.sleep(1)
                 self.w.add( 1 )
@@ -119,9 +125,14 @@ class PROCESS_ALL(object):
                 self.e.add( 0.001 )
                 time.sleep(1)
 
-        except (KeyboardInterrupt, SystemExit, Exception) as e:
-            print "Exit...", e
+        except (KeyboardInterrupt, SystemExit):
+            self.L.log("Exit...")
 
+        except (Exception) as e:
+            self.L.log(traceback.format_exc())
+           
+        finally:
+            pass
 
 if __name__ == '__main__':
     my_app = PROCESS_ALL()

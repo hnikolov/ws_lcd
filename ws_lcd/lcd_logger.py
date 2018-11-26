@@ -1,8 +1,9 @@
 #!/usr/bin/python
 import paho.mqtt.client as mqtt
-import datetime, sys
-import time
+import time, datetime, sys
+
 from layout_mix import MY_GUI
+from log import LOG
 
 MQTT_SERVER = "192.168.2.100"
 
@@ -10,6 +11,8 @@ MQTT_SERVER = "192.168.2.100"
 class MQTT_LOGGER():
     """ Send data via mqtt... """
     def __init__(self, WS = False):
+        self.L = LOG()
+        
         self.connected = False
         self.dconn     = 0
 
@@ -25,6 +28,7 @@ class MQTT_LOGGER():
         self.mqtt_client.on_connect     = self.on_connect
         self.mqtt_client.on_message     = self.on_message
         self.mqtt_client.on_disconnect  = self.on_disconnect
+        self.mqtt_client.on_log         = self.on_log
 
         self.mqtt_client.disconnect() # Just in case
         self.mqtt_client.connect(MQTT_SERVER, 1883, 60)
@@ -32,6 +36,11 @@ class MQTT_LOGGER():
         self.my_gui = MY_GUI(WS)
 
     # MQTT handler ===============================================================================
+    def on_log(client, userdata, level, buf):
+        self.L.log( buf )
+        if "PINGRESP" in buf:
+            self.connected = True
+
     def on_connect(self, client, userdata, flags, rc):
         """ The callback for when the client receives a CONNACK response from the server.
             Subscribing in on_connect() means that if we lose the connection and
@@ -43,12 +52,12 @@ class MQTT_LOGGER():
         client.subscribe(self.mqtt_topic_water + '/#')
         self.mqtt_client.publish(self.mqtt_topic_last_will, "online, " + str(self.dconn), qos=0, retain=True)
         self.connected = True
-        print "Connected with result code:", str(rc)
-        print "Connected to: " + MQTT_SERVER
+        self.L.log("Connected with result code: " + str(rc))
+        self.L.log("Connected to: " + MQTT_SERVER)
 
     def on_disconnect(self, client, userdata, msg):
         """ The callback for when disconnect from the server. """
-        print "Disconnected:", msg
+        self.L.log("Disconnected: " + msg)
         self.connected = False
         self.dconn    += 1
 
@@ -88,16 +97,17 @@ class MQTT_LOGGER():
     # ===============================================================================
 
     def connect(self):
-       try:
-           self.mqtt_client.loop_stop() # Stop also auto reconnects
-           self.mqtt_client.connect(MQTT_SERVER, 1883, 60)
-           self.mqtt_client.loop_start()
-           while not self.connected:
-               time.sleep(1)
-       except Exception as e:
-           print e
-           time.sleep(2)
+        try:
+            self.led_on()
+            self.mqtt_client.loop_stop() # Stop also auto reconnects
+            self.mqtt_client.connect(MQTT_SERVER, 1883, 60)
+            self.mqtt_client.loop_start()
+            while not self.connected:
+                time.sleep(2)
 
+        except Exception:
+            self.L.log(traceback.format_exc())
+            time.sleep(4)           
 
     def display_next(self):
         self.my_gui.layout_next()
@@ -105,6 +115,7 @@ class MQTT_LOGGER():
     def display_prev(self):
         self.my_gui.layout_prev()
 
+    # To be removed at some point
     def run_no_buttons(self):
         try:
             self.connect()
@@ -123,11 +134,17 @@ class MQTT_LOGGER():
                         time.sleep(1)
                     self.my_gui.layout_next()
 
-        except (KeyboardInterrupt, SystemExit, Exception) as e:
-            print "Exit...", e
+        except (KeyboardInterrupt, SystemExit):
+            self.L.log("Exit...")
+
+        except (Exception) as e:
+            self.L.log(traceback.format_exc())
+            
+        finally:
             self.mqtt_client.loop_stop()
             self.mqtt_client.disconnect()
             self.my_gui.lcd.close()
+    # ------------------------------------
 
     def run(self):
         try:
@@ -140,12 +157,17 @@ class MQTT_LOGGER():
                     self.my_gui.update_display() # Updated only when data has changed
                     time.sleep(1)
 
-        except (KeyboardInterrupt, SystemExit, Exception) as e:
-            print "Exit...", e
+        except (KeyboardInterrupt, SystemExit):
+            self.L.log("Exit...")
+
+        except (Exception) as e:
+            self.L.log(traceback.format_exc())
+            
+        finally:
             self.mqtt_client.loop_stop()
             self.mqtt_client.disconnect()
             self.my_gui.lcd.close()
-
+            
 # ============================================================================================
 if __name__ == '__main__':
     myApp = MQTT_LOGGER(WS=True)
