@@ -21,8 +21,8 @@ MQTT_SERVER = "192.168.2.100"
 
 class PROCESS_ALL(object):
     def __init__(self):
-        self.L = LOG()
-        
+        self.L = LOG(False)
+
         self.w = IRQ_DATA(0)
         self.g = IRQ_DATA(0.0)
         self.e = IRQ_DATA(0.0)
@@ -54,11 +54,11 @@ class PROCESS_ALL(object):
         self.mqtt_client.on_log         = self.on_log
 
     # MQTT handler ===============================================================================
-    def on_log(client, userdata, level, buf):
+    def on_log(self, client, userdata, level, buf):
         self.L.log(buf)
         if "PINGRESP" in buf:
             self.connected = True
-    
+
     def on_connect(self, client, userdata, flags, rc):
         if rc == 0:
             self.connected = True
@@ -69,7 +69,7 @@ class PROCESS_ALL(object):
 
     def on_disconnect(self, client, userdata, msg):
         """ The callback for when disconnect from the server. """
-        self.L.log("Disconnected: " + msg)
+        self.L.log("Disconnected: " + str(msg))
         self.connected = False
         self.dconn    += 1
         self.led_off()
