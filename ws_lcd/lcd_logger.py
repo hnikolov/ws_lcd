@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import paho.mqtt.client as mqtt
 import time, datetime, sys
+import traceback
 
 from layout_mix import MY_GUI
 from log import LOG

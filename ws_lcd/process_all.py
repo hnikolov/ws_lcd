@@ -9,7 +9,7 @@
     (probably caused by the same MAC/IP address?)
 """
 import paho.mqtt.client as mqtt
-import time
+import time, traceback
 
 from log import LOG
 from irq_data import IRQ_DATA
