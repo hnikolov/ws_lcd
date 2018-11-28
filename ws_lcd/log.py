@@ -6,7 +6,7 @@ class LOG(object):
         self.prnt = prnt
 
     def log(self, data):
-        st = time.strftime('%Y-%m-%d %H:%M:%S')
+        st = time.strftime('%m-%d-%Y %H:%M:%S')
         line = st + ":" + str(data) + '\n'
         if self.prnt == True: print line
 
