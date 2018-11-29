@@ -21,6 +21,7 @@ class MQTT_LOGGER():
         self.mqtt_topic_temperature     = "power_meter/temperature"
         self.mqtt_topic_water           = "power_meter/water"
         self.mqtt_topic_gas             = "power_meter/gas"
+        self.mqtt_topic_status          = "power_meter/status/A"
         self.mqtt_topic_last_will       = "power_meter/status/L"
 
         self.mqtt_client = mqtt.Client(client_id="lcd_logger")
@@ -49,18 +50,19 @@ class MQTT_LOGGER():
             Subscribing in on_connect() means that if we lose the connection and
             reconnect then subscriptions will be renewed.
         """
-        client.subscribe("power_meter/status/#")
+#        client.subscribe("power_meter/status/#")
+        client.subscribe(self.mqtt_topic_status)
         client.subscribe(self.mqtt_topic_electricity + '/#')
         client.subscribe(self.mqtt_topic_gas + '/#')
         client.subscribe(self.mqtt_topic_water + '/#')
         self.mqtt_client.publish(self.mqtt_topic_last_will, "online, " + str(self.dconn), qos=0, retain=True)
         self.connected = True
-        self.log.info("Connected with result code: " + str(rc))
+        self.log.error("Connected with result code: " + str(rc))
         self.log.info("Connected to: " + MQTT_SERVER)
 
     def on_disconnect(self, client, userdata, msg):
         """ The callback for when disconnect from the server. """
-        self.log.info("Disconnected: " + str(msg))
+        self.log.error("Disconnected: " + str(msg))
         self.connected = False
         self.dconn    += 1
 
@@ -93,7 +95,12 @@ class MQTT_LOGGER():
             index = int(msg.topic.split('/')[-1])
             self.my_gui.update_gas_hour(index, float(msg.payload))
 
-#        else: # msg.topic == status
+        elif self.mqtt_topic_status == msg.topic:
+            # TODO
+            if "online" in msg.payload:
+                print "A is online"
+            elif "offline" in msg.payload:
+                print "A is offline"
 #            print st[:-3],  ":", msg.topic, ":", msg.payload
 
         self.my_gui.update_eur_total()
@@ -143,7 +150,7 @@ class MQTT_LOGGER():
 
         except (Exception) as e:
             self.log.error(traceback.format_exc())
-            
+
         finally:
             self.mqtt_client.loop_stop()
             self.mqtt_client.disconnect()
@@ -159,11 +166,11 @@ class MQTT_LOGGER():
                 self.my_gui.set_date_time()
                 self.my_gui.update_display() # Updated only when data has changed
                 # time.sleep(1)
-                
-                current_time = time.time()
+
+#                current_time = time.time()
                 rc = self.mqtt_client.loop()
-                print time.time() - current_time
-                
+#                print time.time() - current_time
+
                 if rc != 0:
                     self.log.error("Loop, rc = " + str(rc))
 
@@ -172,12 +179,12 @@ class MQTT_LOGGER():
 
         except (Exception) as e:
             self.log.error(traceback.format_exc())
-            
+
         finally:
             # self.mqtt_client.loop_stop()
             self.mqtt_client.disconnect()
             self.my_gui.lcd.close()
-            
+
 # ============================================================================================
 if __name__ == '__main__':
     myApp = MQTT_LOGGER(WS=True)
