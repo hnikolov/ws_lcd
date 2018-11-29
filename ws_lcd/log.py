@@ -2,9 +2,28 @@
 import time
 
 class LOG(object):
-    def __init__(self, prnt = True):
-        self.prnt = prnt
+    """ Levels:
+        0 - No logging
+        1 - Errors
+        2 - Errors and Warnings
+        3 - Errors, Warnings, Info
+    """
+    def __init__(self, prnt = True, level = 1):
+        self.prnt  = prnt
+        self.level = level # Error, Warning, Info
 
+    def error(self, data):
+        if self.level > 0:
+            self.log( data )
+            
+    def warning(self, data):
+        if self.level > 1:
+            self.log( data )
+            
+    def info(self, data):
+        if self.level > 2:
+            self.log( data )
+            
     def log(self, data):
         st = time.strftime('%m-%d-%Y %H:%M:%S')
         line = st + ":" + str(data) + '\n'

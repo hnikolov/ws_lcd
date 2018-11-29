@@ -21,8 +21,12 @@ class Layout_EUR(Layout):
         self.row_4_y = self.sep_4_y + self.sh1
 
         # Build the layout
-        self.cdate = Component(72, self.ch1, font_size=14, bg_color=0, align=1)
-        self.cdate.set_position(0, 0)
+        self.i   = Component(self.ch1, self.ch1, iw=self.ch1-6, ih=self.ch1-6, image='purple_r.jpg', bg_color=0)
+        self.i.set_position(2, 0)
+        self.cdate = Component(52, self.ch1, font_size=14, bg_color=0, align=1)
+        self.cdate.set_position(self.ch1+2, 0)
+        # self.cdate = Component(72, self.ch1, font_size=14, bg_color=0, align=1)
+        # self.cdate.set_position(0, 0)
         self.cdate.set(time.strftime('%d-%b'))
 
         self.ctime = Component(56, self.ch1, font_size=14, bg_color=0, align=1)
@@ -72,7 +76,7 @@ class Layout_EUR(Layout):
         self.etu.set_text(u'\u20AC', x=0, align=0) # Euro
 
         # Add components to the layout
-        self.add([self.cdate, self.ctime])
+        self.add([self.i, self.cdate, self.ctime])
         self.add([self.ewi, self.ewv, self.ewu])
         self.add([self.egi, self.egv, self.egu])
         self.add([self.eei, self.eev, self.eeu])
@@ -122,6 +126,14 @@ if __name__ == '__main__':
         lcd.update(L2)
 
     raw_input()
+
+    for _ in range(10):    
+        L2.i.set_image(L2.ch1-6, L2.ch1-6, 'purple_r.jpg')
+        time.sleep(.5)
+        lcd.draw(L2)
+        L2.i.set_image(L2.ch1-6, L2.ch1-6, 'gray_r.jpg')
+        time.sleep(.5)
+        lcd.draw(L2)
     
     L2.clear_all()
     lcd.draw(L2)

@@ -72,10 +72,10 @@ class Component(object):
         
 
     def set_color(self, bg_color):
-        self.bg        = 255 if bg_color == 255 else 0   # 0 - black, 255 - white
-        self.fg        = 0   if bg_color == 255 else 255
-#        self.bg        = (255,255,255) if bg_color == 255 else (0,0,0)
-#        self.fg        = (0,0,0) if bg_color == 255 else (255,255,255)
+#        self.bg        = 255 if bg_color == 255 else 0   # 0 - black, 255 - white
+#        self.fg        = 0   if bg_color == 255 else 255
+        self.bg        = (255,255,255) if bg_color == 255 else (0,0,0)
+        self.fg        = (0,0,0) if bg_color == 255 else (255,255,255)
         
     def set_width(self, width):
         if width > self.max_size: print "Width is > 128. Set to 128"
@@ -89,8 +89,8 @@ class Component(object):
     #       expressed in bytes should be converted to RGBA images
     # Get this if Image.new("RGB"...)
     def set_image(self, width, height, image):
-#        self.image = Image.new("RGB", (self.w, self.h), self.bg)
-        self.image = Image.new('1', (self.w, self.h), self.bg) # TODO 'RGB'
+        self.image = Image.new("RGB", (self.w, self.h), self.bg)
+#        self.image = Image.new('1', (self.w, self.h), self.bg) # TODO 'RGB'
         if image != None:
             im = Image.open(path_prefix + '/icons/' + image)
             im = im.resize((width-2,height-2), Image.ANTIALIAS)

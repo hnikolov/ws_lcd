@@ -21,7 +21,7 @@ MQTT_SERVER = "192.168.2.100"
 
 class PROCESS_ALL(object):
     def __init__(self):
-        self.L = LOG(False)
+        self.log = LOG(prnt = False, level = 1)
 
         self.w = IRQ_DATA(0)
         self.g = IRQ_DATA(0.0)
@@ -56,7 +56,7 @@ class PROCESS_ALL(object):
     # MQTT handler ===============================================================================
     def on_log(self, client, userdata, level, buf):
         if "PUBLISH" not in buf:
-            self.L.log(buf)
+            self.log.info(buf)
 
         if "PINGRESP" in buf:
             self.connected = True
@@ -65,14 +65,14 @@ class PROCESS_ALL(object):
     def on_connect(self, client, userdata, flags, rc):
         if rc == 0:
             self.connected = True
-            self.L.log("Connected to: " + MQTT_SERVER)
+            self.log.info("Connected to: " + MQTT_SERVER)
             self.led_off()
             self.mqtt_client.publish(self.mqtt_topic_last_will, "online, " + str(self.dconn), self.QoS, self.retain)
-        self.L.log("Result code: " + str(rc))
+        self.log.info("Result code: " + str(rc))
 
     def on_disconnect(self, client, userdata, msg):
         """ The callback for when disconnect from the server. """
-        self.L.log("Disconnected: " + str(msg))
+        self.log.info("Disconnected: " + str(msg))
         self.connected = False
         self.dconn    += 1
         self.led_off()
@@ -85,14 +85,14 @@ class PROCESS_ALL(object):
         try:
             while not self.connected:
                 self.led_on()
-                self.L.log("Connecting...")
+                self.log.info("Connecting...")
                 self.mqtt_client.loop_stop() # Stop also auto reconnects
                 self.mqtt_client.connect(MQTT_SERVER, 1883, 60)
                 self.mqtt_client.loop_start()
                 time.sleep(10)
 
         except Exception:
-            self.L.log(traceback.format_exc())
+            self.log.error(traceback.format_exc())
             time.sleep(10)
 
     def publish(self, topic, data):
@@ -164,10 +164,10 @@ class PROCESS_ALL(object):
                     time.sleep(1)
 
         except (KeyboardInterrupt, SystemExit):
-            self.L.log("Exit...")
+            self.log.error("Exit...")
 
         except (Exception) as e:
-            self.L.log(traceback.format_exc())
+            self.log.error(traceback.format_exc())
             
         finally:
             self.mqtt_client.loop_stop()
