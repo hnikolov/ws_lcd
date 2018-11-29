@@ -95,12 +95,12 @@ class MQTT_LOGGER():
             index = int(msg.topic.split('/')[-1])
             self.my_gui.update_gas_hour(index, float(msg.payload))
 
-        elif self.mqtt_topic_status == msg.topic:
-            # TODO
-            if "online" in msg.payload:
-                print "A is online"
-            elif "offline" in msg.payload:
-                print "A is offline"
+#        elif self.mqtt_topic_status == msg.topic:
+#            # TODO
+#            if "online" in msg.payload:
+#                print "A is online"
+#            elif "offline" in msg.payload:
+#                print "A is offline"
 #            print st[:-3],  ":", msg.topic, ":", msg.payload
 
         self.my_gui.update_eur_total()

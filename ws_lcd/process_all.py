@@ -68,11 +68,11 @@ class PROCESS_ALL(object):
             self.log.info("Connected to: " + MQTT_SERVER)
             self.led_off()
             self.mqtt_client.publish(self.mqtt_topic_last_will, "online, " + str(self.dconn), self.QoS, self.retain)
-        self.log.info("Result code: " + str(rc))
+        self.log.error("Connected with result code: " + str(rc))
 
     def on_disconnect(self, client, userdata, msg):
         """ The callback for when disconnect from the server. """
-        self.log.info("Disconnected: " + str(msg))
+        self.log.error("Disconnected: " + str(msg))
         self.connected = False
         self.dconn    += 1
         self.led_off()
