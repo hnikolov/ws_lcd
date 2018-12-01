@@ -6,7 +6,7 @@ import traceback
 from layout_mix import MY_GUI
 from log import LOG
 
-MQTT_SERVER = "192.168.2.100"
+MQTT_SERVER = "192.168.2.101"
 
 
 class MQTT_LOGGER():
