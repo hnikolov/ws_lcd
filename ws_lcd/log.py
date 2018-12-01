@@ -13,15 +13,15 @@ class LOG(object):
         self.level = level # Error, Warning, Info
 
     def error(self, data):
-        if self.level > 0:
+        if self.level >= 1:
             self.log( data )
 
     def warning(self, data):
-        if self.level > 1:
+        if self.level >= 2:
             self.log( data )
 
     def info(self, data):
-        if self.level > 2:
+        if self.level >= 3:
             self.log( data )
 
     def log(self, data):
