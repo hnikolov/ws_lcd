@@ -17,7 +17,7 @@ from irq_data import IRQ_DATA
 def led_on():  print 'default', # default implementation
 def led_off(): print '\n'
 
-MQTT_SERVER = "192.168.2.101"
+MQTT_SERVER = "192.168.2.100"
 
 class PROCESS_ALL(object):
     def __init__(self):
@@ -60,7 +60,7 @@ class PROCESS_ALL(object):
 
         if "PINGRESP" in buf:
             self.connected = True
-            self.led_on()
+            self.led_off()
 
     def on_connect(self, client, userdata, flags, rc):
         if rc == 0:
@@ -75,7 +75,7 @@ class PROCESS_ALL(object):
         self.log.error("Disconnected: " + str(msg))
         self.connected = False
         self.dconn    += 1
-        self.led_off()
+        self.led_on()
 
     def on_publish(self, client, userdata, mid):
         self.led_off()
