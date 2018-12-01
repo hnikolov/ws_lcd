@@ -15,20 +15,20 @@ class LOG(object):
     def error(self, data):
         if self.level > 0:
             self.log( data )
-            
+
     def warning(self, data):
         if self.level > 1:
             self.log( data )
-            
+
     def info(self, data):
         if self.level > 2:
             self.log( data )
-            
+
     def log(self, data):
         st = time.strftime('%m-%d-%Y %H:%M:%S')
         line = st + ":" + str(data) + '\n'
         if self.prnt == True: print line
 
-        file_name = time.strftime('%Y-%m-%d') + "_log.txt"
+        file_name = time.strftime('%m-%d-%Y') + "_log.txt"
         with open(file_name, "a+") as fp:
             fp.write(line)
