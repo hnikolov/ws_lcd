@@ -94,9 +94,14 @@ class LTemplate(Layout):
         self.gv.set(round(self.price_per_unit * value, 2)) # Eur
         
     def update_hour_data(self, position, value):
-        self.ei.set_text(str(position)+"h", align=1) # TODO
-        self.ev.set(value)
         self.egraph.set_bar(position, value)
+        # Always show the last hour data
+        # It may get messed during update after reconnect
+        hour = time.strftime('%H')
+        self.ei.set_text(hour+"h", align=1)
+        self.ev.set(self.egraph.bars[int(hour)])
+#        self.ei.set_text(str(position)+"h", align=1) # TODO
+#        self.ev.set(value)
         
         
 if __name__ == '__main__':
@@ -123,6 +128,7 @@ if __name__ == '__main__':
 #        L2.egraph.set_bar(i, i+1)
         L2.set_date_time()
         lcd.update(L2)
+        raw_input()
         
     L2.update_hour_data(23, 12.0)        
 #    L2.egraph.set_bar(23,12.0)
