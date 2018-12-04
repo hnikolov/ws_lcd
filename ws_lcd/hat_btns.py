@@ -58,10 +58,10 @@ def cbk_jsk_dn(channel):
     myApp.display_prev()
 
 def cbk_jsk_lt(channel):
-    myApp.display_prev()
+    myApp.display_hour_prev()
 
 def cbk_jsk_rt(channel):
-    myApp.display_next()
+    myApp.display_hour_next()
 
 def cbk_jsk_ps(channel):
     backlight_toggle()

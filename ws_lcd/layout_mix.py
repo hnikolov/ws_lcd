@@ -82,6 +82,18 @@ class MY_GUI(object):
         self.L4.set_date_time()
         self.L5.set_date_time()
         
+    def hour_data_next(self):
+        self.L3.hour_data_next()
+        self.L4.hour_data_next()
+        self.L5.hour_data_next()
+        self.update_display()
+
+    def hour_data_prev(self):
+        self.L3.hour_data_prev()
+        self.L4.hour_data_prev()
+        self.L5.hour_data_prev()
+        self.update_display()
+
 # ===========================================================
 class TEST_MY_GUI(object):
     def __init__(self):
@@ -131,19 +143,32 @@ class TEST_MY_GUI(object):
         self.init_some_data()
         for _ in range(2):
             self.update_L1()
-            time.sleep(2)
+            time.sleep(1)
 
             self.my_gui.layout_next()
             self.update_L2()
             self.update_L1() # Should not affect the display (shows L2)
-            time.sleep(2)
+            time.sleep(1)
             
             self.my_gui.layout_prev()            
        
         # Show all screens
         for _ in range(10):
-            time.sleep(2)
+            time.sleep(1)
             self.my_gui.layout_next()
+
+        # Show hour data above the bar graph
+        self.my_gui.L_IDX = 2
+        self.my_gui.draw_display()
+        for _ in range(10):
+            self.my_gui.hour_data_next()
+            time.sleep(.3)
+
+        self.my_gui.L_IDX = 3
+        self.my_gui.draw_display()
+        for _ in range(10):
+            self.my_gui.hour_data_prev()
+            time.sleep(.3)
 
         self.my_gui.lcd.close() 
     

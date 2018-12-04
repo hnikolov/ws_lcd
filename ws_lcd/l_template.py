@@ -9,6 +9,8 @@ class LTemplate(Layout):
         
         self.price_per_unit = ppu
         
+        self.hidx = 0
+
         self.ch1     = 18 # component height 1
         self.ch2     = 26 # component height 2
         self.sh1     =  2 # separator height 1
@@ -84,6 +86,7 @@ class LTemplate(Layout):
         self.gv.set(0.0)
         self.ev.set(0.0)
         self.egraph.clear_bars()
+        self.ei.set_text("0h", align=1)
 
     def set_date_time(self):
         self.cdate.set(time.strftime('%d-%b'))
@@ -92,17 +95,28 @@ class LTemplate(Layout):
     def update(self, value):
         self.wv.set(value)
         self.gv.set(round(self.price_per_unit * value, 2)) # Eur
+
+    def show_hour_data(self, hour):
+        self.ei.set_text(str(hour)+"h", align=1)
+        self.ev.set(self.egraph.bars[hour])
         
     def update_hour_data(self, position, value):
         self.egraph.set_bar(position, value)
         # Always show the last hour data
         # It may get messed during update after reconnect
-        hour = time.strftime('%H')
-        self.ei.set_text(hour+"h", align=1)
-        self.ev.set(self.egraph.bars[int(hour)])
+        self.hidx = int(time.strftime('%H'))
+        self.show_hour_data(self.hidx)
 #        self.ei.set_text(str(position)+"h", align=1) # TODO
 #        self.ev.set(value)
-        
+
+    def hour_data_next(self):
+        self.hidx = (self.hidx + 1) % 24
+        self.show_hour_data(self.hidx)
+
+    def hour_data_prev(self):
+        self.hidx = (self.hidx - 1) % 24
+        self.show_hour_data(self.hidx)
+
         
 if __name__ == '__main__':
 
@@ -128,7 +142,6 @@ if __name__ == '__main__':
 #        L2.egraph.set_bar(i, i+1)
         L2.set_date_time()
         lcd.update(L2)
-        raw_input()
         
     L2.update_hour_data(23, 12.0)        
 #    L2.egraph.set_bar(23,12.0)
@@ -143,7 +156,19 @@ if __name__ == '__main__':
         lcd.update(L2)
 
     raw_input()
+
+    for i in range(18):
+        L2.hour_data_next()
+        lcd.update(L2)
+        time.sleep(0.3)
     
+    raw_input()
+
+    for i in range(18):
+        L2.hour_data_prev()
+        lcd.update(L2)
+        time.sleep(0.3)
+
     L2.clear_all()
     lcd.draw(L2)
     lcd.close()

@@ -126,6 +126,12 @@ class MQTT_LOGGER():
     def display_prev(self):
         self.my_gui.layout_prev()
 
+    def display_hour_next(self):
+        self.my_gui.hour_data_next()
+
+    def display_hour_prev(self):
+        self.my_gui.hour_data_prev()
+
     # To be removed at some point
     def run_no_buttons(self):
         try:
