@@ -6,10 +6,10 @@ class LOG(object):
         self.prnt = prnt
 
     def log(self, data):
-        st = time.strftime('%Y-%m-%d %H:%M:%S')
+        st = time.strftime('%d-%b-%Y %H:%M:%S')
         line = st + ":" + str(data) + '\n'
         if self.prnt == True: print line
 
-        file_name = time.strftime('%Y-%m-%d') + "_log.txt"
+        file_name = "log/" + time.strftime('%d-%b-%Y') + "_log.txt"
         with open(file_name, "a+") as fp:
             fp.write(line)

@@ -29,6 +29,6 @@ class LOG(object):
         line = st + ":" + str(data) + '\n'
         if self.prnt == True: print line
 
-        file_name = time.strftime('%d-%m-%Y') + "_log.txt"
+        file_name = "log/" + time.strftime('%d-%m-%Y') + "_log.txt" # Folder must exist
         with open(file_name, "a+") as fp:
             fp.write(line)

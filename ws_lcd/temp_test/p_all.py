@@ -78,7 +78,7 @@ class PROCESS_ALL(object):
 
 
     def write_file(self):
-        file_name = self.sdate + '.csv'
+        file_name = "log/" + self.sdate + '.csv' # Folder must exist
         with open(file_name, 'w') as fp:
             fp.write(self.sdate + ', W, G, E')
 #            for h, (w, g, e) in enumerate(zip(self.h_w, self.h_g, self.h_e)):
