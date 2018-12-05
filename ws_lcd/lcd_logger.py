@@ -108,13 +108,9 @@ class MQTT_LOGGER():
 
     def connect(self):
         try:
-            # while not self.connected: # Not needed in this application
-            # self.mqtt_client.loop_stop() # Stop also auto reconnects
             self.mqtt_client.connect(MQTT_SERVER, 1883, 60)
-            # self.mqtt_client.loop_start()
-            # time.sleep(10)
-            self.mqtt_client.loop(timeout=4.0)
-            time.sleep(4) # Is this needed?
+            self.mqtt_client.loop(timeout = 4.0)
+            time.sleep(4)
 
         except Exception:
             self.log.error(traceback.format_exc())
@@ -171,12 +167,8 @@ class MQTT_LOGGER():
 
                 self.my_gui.set_date_time()
                 self.my_gui.update_display() # Updated only when data has changed
-                # time.sleep(1)
 
-#                current_time = time.time()
                 rc = self.mqtt_client.loop()
-#                print time.time() - current_time
-
                 if rc != 0:
                     self.log.error("Loop, rc = " + str(rc))
 
@@ -187,7 +179,6 @@ class MQTT_LOGGER():
             self.log.error(traceback.format_exc())
 
         finally:
-            # self.mqtt_client.loop_stop()
             self.mqtt_client.disconnect()
             self.my_gui.lcd.close()
 
