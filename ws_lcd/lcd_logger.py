@@ -110,7 +110,7 @@ class MQTT_LOGGER():
         try:
             self.mqtt_client.connect(MQTT_SERVER, 1883, 60)
             self.mqtt_client.loop(timeout = 4.0)
-            time.sleep(4)
+            time.sleep(4) # Do we need this? loop() will timeout after 4s
 
         except Exception:
             self.log.error(traceback.format_exc())
@@ -132,6 +132,8 @@ class MQTT_LOGGER():
     def run_no_buttons(self):
         try:
             self.connect()
+            self.mqtt_client.loop_start()
+            
             while True:
                 if self.connected == False:
                     self.connect()

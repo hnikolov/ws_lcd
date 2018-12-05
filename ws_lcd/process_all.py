@@ -83,14 +83,16 @@ class PROCESS_ALL(object):
 
     def connect(self):
         try:
-            while not self.connected:
-                self.led_on()
-                self.log.info("Connecting...")
-                self.mqtt_client.loop_stop() # Stop also auto reconnects
-                self.mqtt_client.connect(MQTT_SERVER, 1883, 60)
-                self.mqtt_client.loop_start()
-                time.sleep(10)
-
+#            while not self.connected:
+            self.led_on()
+#            self.log.info("Connecting...")
+#                self.mqtt_client.loop_stop() # Stop also auto reconnects
+            self.mqtt_client.connect(MQTT_SERVER, 1883, 60)
+#                self.mqtt_client.loop_start()
+#                time.sleep(10)
+            self.mqtt_client.loop(timeout = 4.0)
+            time.sleep(4) # Do we need this? loop() will timeout after 4s
+            
         except Exception:
             self.log.error(traceback.format_exc())
             time.sleep(10)
@@ -138,30 +140,33 @@ class PROCESS_ALL(object):
 
     def run(self):
         try:
-            self.connect()
+#            self.connect()
             while True:
                 if self.connected == False:
                     self.connect()
-                else:
-                    self.update_data()
+#                else:
+                self.update_data()
 
-                    if int(time.strftime('%H')) != self.hour:
-                        self.update_hour(self.hour)
-                        self.hour = int(time.strftime('%H'))
+                if int(time.strftime('%H')) != self.hour:
+                    self.update_hour(self.hour)
+                    self.hour = int(time.strftime('%H'))
 
-                    if self.hour == 1 and self.cleared_mqtt == False: # New day 01:00 - clear mqtt data
-                        self.clear_mqtt_data()
-                        self.cleared_mqtt = True
+                if self.hour == 1 and self.cleared_mqtt == False: # New day 01:00 - clear mqtt data
+                    self.clear_mqtt_data()
+                    self.cleared_mqtt = True
 
-                    if time.strftime('%d-%b-%y') != self.sdate: # New day
-                        self.write_file()
-                        self.w.clear_data()
-                        self.g.clear_data()
-                        self.e.clear_data()
-                        self.cleared_mqtt = False
-                        self.sdate = time.strftime('%d-%b-%y')
+                if time.strftime('%d-%b-%y') != self.sdate: # New day
+                    self.write_file()
+                    self.w.clear_data()
+                    self.g.clear_data()
+                    self.e.clear_data()
+                    self.cleared_mqtt = False
+                    self.sdate = time.strftime('%d-%b-%y')
 
-                    time.sleep(1)
+                rc = self.mqtt_client.loop()
+                if rc != 0:
+                    self.log.error("Loop, rc = " + str(rc))
+#                    time.sleep(1)
 
         except (KeyboardInterrupt, SystemExit):
             self.log.error("Exit...")
@@ -170,7 +175,7 @@ class PROCESS_ALL(object):
             self.log.error(traceback.format_exc())
             
         finally:
-            self.mqtt_client.loop_stop()
+#            self.mqtt_client.loop_stop()
             self.mqtt_client.disconnect()
 
             
