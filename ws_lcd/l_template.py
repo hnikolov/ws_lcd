@@ -104,7 +104,7 @@ class LTemplate(Layout):
         self.egraph.set_bar(position, value)
         # Always show the last hour data
         # It may get messed during update after reconnect
-        self.hidx = int(time.strftime('%H'))
+        self.hidx = (int(time.strftime('%H')) - 1) % 24
         self.show_hour_data(self.hidx)
 #        self.ei.set_text(str(position)+"h", align=1) # TODO
 #        self.ev.set(value)
