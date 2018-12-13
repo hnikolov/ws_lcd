@@ -7,7 +7,8 @@ from layout_mix import MY_GUI
 from log import LOG
 
 # MQTT_SERVER = "192.168.2.100"
-MQTT_SERVER = "192.168.2.101"
+# MQTT_SERVER = "192.168.2.101"
+MQTT_SERVER = "localhost"
 
 
 class MQTT_LOGGER():
