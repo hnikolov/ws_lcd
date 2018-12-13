@@ -84,13 +84,8 @@ class PROCESS_ALL(object):
 
     def connect(self):
         try:
-#            while not self.connected:
             self.led_on()
-#            self.log.info("Connecting...")
-#                self.mqtt_client.loop_stop() # Stop also auto reconnects
             self.mqtt_client.connect(MQTT_SERVER, 1883, 60)
-#                self.mqtt_client.loop_start()
-#                time.sleep(10)
             time.sleep(4) # Allow some time to connect
             self.mqtt_client.loop(timeout = 4.0)
 
@@ -141,11 +136,10 @@ class PROCESS_ALL(object):
 
     def run(self):
         try:
-#            self.connect()
             while True:
                 if self.connected == False:
                     self.connect()
-#                else:
+
                 self.update_data()
 
                 if int(time.strftime('%H')) != self.hour:
