@@ -6,13 +6,14 @@ import traceback
 from layout_mix import MY_GUI
 from log import LOG
 
-MQTT_SERVER = "192.168.2.100"
+# MQTT_SERVER = "192.168.2.100"
+MQTT_SERVER = "192.168.2.101"
 
 
 class MQTT_LOGGER():
     """ Send data via mqtt... """
     def __init__(self, WS = False):
-        self.log = LOG(prnt = False, level = 0)
+        self.log = LOG(prnt = False, level = 1)
 
         self.connected = False
         self.dconn     = 0
@@ -57,12 +58,12 @@ class MQTT_LOGGER():
         client.subscribe(self.mqtt_topic_water + '/#')
         self.mqtt_client.publish(self.mqtt_topic_last_will, "online, " + str(self.dconn), qos=0, retain=True)
         self.connected = True
-        self.log.error("Connected with result code: " + str(rc))
+        self.log.warning("Connected with result code: " + str(rc))
         self.log.info("Connected to: " + MQTT_SERVER)
 
     def on_disconnect(self, client, userdata, msg):
         """ The callback for when disconnect from the server. """
-        self.log.error("Disconnected: " + str(msg))
+        self.log.warning("Disconnected: " + str(msg))
         self.connected = False
         self.dconn    += 1
 
@@ -113,7 +114,7 @@ class MQTT_LOGGER():
             time.sleep(4) # Do we need this? loop() will timeout after 4s
 
         except Exception:
-            self.log.error(traceback.format_exc())
+            self.log.warning(traceback.format_exc())
             time.sleep(10)
 
     def display_next(self):
@@ -133,7 +134,7 @@ class MQTT_LOGGER():
         try:
             self.connect()
             self.mqtt_client.loop_start()
-            
+
             while True:
                 if self.connected == False:
                     self.connect()
