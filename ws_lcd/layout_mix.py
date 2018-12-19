@@ -3,29 +3,30 @@ import time
 from layout import Layout
 from l_energy import LEnergy
 from l_template import LTemplate
-from layout_222 import Layout_222
 from layout_eur import Layout_EUR
+from l_weather import LWeather
 from lcd import LCD
 
 
 class MY_GUI(object):
     def __init__(self, WS = False):
-#        L1 = Layout_222()
         L1 = LEnergy()
         L2 = Layout_EUR()
         L3 = LTemplate(image='tap-water1.jpg', unit='Lit', format_string="{}", ppu=0.0011)
         L4 = LTemplate(image='gas_32x32.png', unit="m" + u'\u00B3', format_string="{0:.2f}", ppu=0.80025)
         L5 = LTemplate(image='plug1.png', unit='kW', format_string="{0:.3f}", ppu=0.24)
+        L6 = LWeather()
 
-        self.Layout = [L1, L2, L3, L4, L5] # Used when displaying
+        self.Layout = [L1, L2, L3, L4, L5, L6] # Used when displaying
         self.L_SIZE = len(self.Layout)
         self.L_IDX  = 0
         
-        self.L1 = self.Layout[0] # Used when updating data
-        self.L2 = self.Layout[1]
+        self.L1 = self.Layout[0] # Ref used when updating data
+        self.L2 = self.Layout[1] # Eur
         self.L3 = self.Layout[2] # Water
         self.L4 = self.Layout[3] # Gas
         self.L5 = self.Layout[4] # Electricity
+        self.L6 = self.Layout[5] # Weather
         
         self.lcd = LCD(WS)
         self.draw_display()
@@ -81,6 +82,7 @@ class MY_GUI(object):
         self.L3.set_date_time()
         self.L4.set_date_time()
         self.L5.set_date_time()
+        self.L6.set_date_time()
         
     def hour_data_next(self):
         self.L3.hour_data_next()
