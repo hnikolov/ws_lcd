@@ -33,7 +33,7 @@ class IRQ_DATA(object):
             self.h_v[i] = self.default
 
         self.v   = self.default # Updated by irq
-        self.lv  = self.default # Last sent
+#        self.lv  = self.default # Last sent, Do not clear
         self.phv = self.default # Previous hour total
 
 

@@ -17,7 +17,8 @@ from irq_data import IRQ_DATA
 def led_on():  print 'default', # default implementation
 def led_off(): print '\n'
 
-MQTT_SERVER = "192.168.2.100"
+# MQTT_SERVER = "192.168.2.100"
+MQTT_SERVER = "localhost"
 
 class PROCESS_ALL(object):
     def __init__(self):
@@ -83,16 +84,11 @@ class PROCESS_ALL(object):
 
     def connect(self):
         try:
-#            while not self.connected:
             self.led_on()
-#            self.log.info("Connecting...")
-#                self.mqtt_client.loop_stop() # Stop also auto reconnects
             self.mqtt_client.connect(MQTT_SERVER, 1883, 60)
-#                self.mqtt_client.loop_start()
-#                time.sleep(10)
+            time.sleep(4) # Allow some time to connect
             self.mqtt_client.loop(timeout = 4.0)
-            time.sleep(4) # Do we need this? loop() will timeout after 4s
-            
+
         except Exception:
             self.log.error(traceback.format_exc())
             time.sleep(10)
@@ -140,11 +136,10 @@ class PROCESS_ALL(object):
 
     def run(self):
         try:
-#            self.connect()
             while True:
                 if self.connected == False:
                     self.connect()
-#                else:
+
                 self.update_data()
 
                 if int(time.strftime('%H')) != self.hour:
