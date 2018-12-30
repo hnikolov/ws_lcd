@@ -28,6 +28,8 @@ class MY_GUI(object):
         self.L5 = self.Layout[4] # Electricity
         self.L6 = self.Layout[5] # Weather
         
+        L6.update()
+        
         self.lcd = LCD(WS)
         self.draw_display()
    
@@ -143,6 +145,7 @@ class TEST_MY_GUI(object):
 
     def run(self):
         self.init_some_data()
+        
         for _ in range(2):
             self.update_L1()
             time.sleep(1)

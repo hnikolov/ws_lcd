@@ -157,7 +157,7 @@ class Component(object):
         self.value -= vlue
         self.set_text(self.fs.format(self.value))
         
-    def get():
+    def get(self):
         return self.value
         
         
