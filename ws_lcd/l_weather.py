@@ -9,8 +9,8 @@ class LWeather(Layout):
         super(LWeather, self).__init__(color = "black")
 
         self.ds = DarkSky()
-        self.last_temperature = 20.0
-        
+        self.last_temperature = 0.0
+
         self.ch2     = 20 # component height 2
         self.sh1     =  2 # separator height 1
 
@@ -60,7 +60,7 @@ class LWeather(Layout):
 
         self.td = Component(34, self.ch2, font_size=22, font='weathericons-regular-webfont.ttf', align=1) # temperature direction
         self.td.set_position(94, self.row_2_y)
-        self.td.set_text(u'\uF058') # Arrow up: f058, down: f044
+        self.td.set_text(u'\uF095') # Arrow up: f058, down: f044
         # -------------------------------------
         self.hi = Component(self.ch2, self.ch2, font='weathericons-regular-webfont.ttf', font_size=16, bg_color=0)
         self.hi.set_position(0, self.row_3_y)
@@ -103,13 +103,13 @@ class LWeather(Layout):
     def set_date_time(self):
         if self.ctime.get()[:2] != time.strftime('%H'):
            self.update()
-        
+
         self.cdate.set(time.strftime('%d-%b'))
         self.ctime.set(time.strftime('%H:%M'))
-        
+
     def update(self):
         self.ds.request()
-        
+
         self.mi.set_text(self.ds.get_icon_moon())
         self.ti.set_text(self.ds.get_icon_weather())
         self.tmax.set(self.ds.get_apparent_temperature_high())
@@ -119,18 +119,21 @@ class LWeather(Layout):
         self.rv.set(self.ds.get_chances_rain())
         self.pv.set(self.ds.get_pressure())
         self.wi.set_text(self.ds.get_icon_wind())
-        
+
         current_temperature = self.ds.get_apparent_temperature()
         self.tv.set(current_temperature)
-        
+
         if current_temperature > self.last_temperature + 1:
             self.td.set_text(u'\uF058') # Arrow up
-        
+
         elif current_temperature < self.last_temperature - 1:
             self.td.set_text(u'\uF044') # Arrow down
-        
-        self.last_temperature = self.ds.get_apparent_temperature()
-        
+
+        else:
+            self.td.set_text(u'\uF095') # New moon
+
+        self.last_temperature = current_temperature
+
 
 
 if __name__ == '__main__':
