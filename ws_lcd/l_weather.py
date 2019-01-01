@@ -123,10 +123,10 @@ class LWeather(Layout):
         current_temperature = self.ds.get_apparent_temperature()
         self.tv.set(current_temperature)
 
-        if current_temperature > self.last_temperature + 1:
+        if current_temperature > self.last_temperature + 0.5:
             self.td.set_text(u'\uF058') # Arrow up
 
-        elif current_temperature < self.last_temperature - 1:
+        elif current_temperature < self.last_temperature - 0.5:
             self.td.set_text(u'\uF044') # Arrow down
 
         else:
