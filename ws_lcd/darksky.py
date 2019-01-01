@@ -28,7 +28,8 @@ class DarkSky(object):
         self.option_list = "exclude=minutely,hourly,alerts&units=si"
         self.headers     = {'Accept-Encoding': 'gzip'}
         
-        self.search_date = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+#        self.search_date = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+        self.search_date = datetime.now().strftime("%Y-%m-%dT%H:00:00")
         self.response_json = {}
 
         # Weather icons
