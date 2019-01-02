@@ -16,7 +16,7 @@ class DarkSky(object):
         self.location  = 'Valkenburg, ZH'
         self.latitude  = '52.1700154'
         self.longitude = '4.42608005921'
-        
+
 #        location = Nominatim().geocode('valkenburg, katwijk', language='en_US')
 #        self.location  = location.address
 #        self.latitude  = str(location.latitude)
@@ -27,7 +27,7 @@ class DarkSky(object):
         # self.option_list = "exclude=currently,minutely,hourly,alerts&units=si"
         self.option_list = "exclude=minutely,hourly,alerts&units=si"
         self.headers     = {'Accept-Encoding': 'gzip'}
-        
+
 #        self.search_date = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
         self.search_date = datetime.now().strftime("%Y-%m-%dT%H:00:00")
         self.response_json = {}
@@ -48,9 +48,12 @@ class DarkSky(object):
 
 
     def request(self):
-        self.search_date = datetime.now().strftime("%Y-%m-%dT%H:00:00")
-        response = requests.get("https://api.darksky.net/forecast/"+self.DARK_SKY_API_KEY+"/"+self.latitude+","+self.longitude+","+self.search_date+"?"+self.option_list, headers=self.headers)    
-        self.response_json = response.json()
+        try:
+            self.search_date = datetime.now().strftime("%Y-%m-%dT%H:00:00")
+            response = requests.get("https://api.darksky.net/forecast/"+self.DARK_SKY_API_KEY+"/"+self.latitude+","+self.longitude+","+self.search_date+"?"+self.option_list, headers=self.headers)    
+            self.response_json = response.json()
+        except:
+            pass
 
 
     def get_icon_weather(self):
@@ -68,7 +71,7 @@ class DarkSky(object):
         if moon_phase == 100: return u'\f073' # NOTE This is not a moon phase icon
         idx = int(moon_phase/3.57) # idx out of range if moon_phase == 100
         return self.moon_phase_array[idx]
-    
+
     def get_icon_wind(self):
         # Beaufort Wind Scale
         #  0: <  0.5 m/s (  2 km/h)
@@ -101,33 +104,33 @@ class DarkSky(object):
         elif wind_speed < 28.4: wind_speed_icon = self.wind_speed_array[10]
         elif wind_speed < 32.6: wind_speed_icon = self.wind_speed_array[11]
         else:                   wind_speed_icon = self.wind_speed_array[12]
-        
+
         return wind_speed_icon
 
     def get_chances_rain(self):
         precip_type = None
         precip_prob_c = 0.0
         precip_prob_d = 0.0
-        
+
         if 'precipProbability' in self.response_json['currently']:
             precip_prob_c = self.response_json['currently']['precipProbability']
-        
+
         if 'precipProbability' in self.response_json['daily']['data'][0]:
             precip_prob_d = self.response_json['daily']['data'][0]['precipProbability']
-      
+
 #        return precip_prob_c * 100
         return max(precip_prob_c, precip_prob_d) * 100
-        
+
 #        if 'precipType' in self.response_json['currently']:
 #            precip_type = self.response_json['currently']['precipType']
-#        
+#
 #        if precip_type != None and precip_prob != None: # precip_type == 'rain', 'snow', 'sleet'
 #            precip_prob *= 100
 #            print('Chance of {}: {:.0f}%'.format(precip_type, precip_prob))
-    
+
     def get_location(self):
         return self.location
-        
+
     def get_temperature(self):
         return self.response_json['currently']['temperature']
 
@@ -143,10 +146,10 @@ class DarkSky(object):
     def get_humidity(self): 
         humidity = self.response_json['currently']['humidity'] # self.response_json['daily']['data'][0]['humidity']
         return humidity * 100
-        
-    def get_pressure(self): 
+
+    def get_pressure(self):
         return self.response_json['currently']['pressure']
-        
+
 
 if __name__ == '__main__':
     ds = DarkSky()
@@ -154,15 +157,15 @@ if __name__ == '__main__':
 #    print ds.response_json
     print ds.get_location()
     print ds.search_date
-#    print str(ds.get_icon_weather())    
-#    print str(ds.get_icon_moon())    
+#    print str(ds.get_icon_weather())
+#    print str(ds.get_icon_moon())
 #    print ds.get_icon_wind()
-    print 'Chances of rain:', ds.get_chances_rain()    
-    print 'Temperature:', ds.get_temperature()    
-    print 'Apparent Temperature:', ds.get_apparent_temperature()    
-    print 'Apparent Temperature Low:', ds.get_apparent_temperature_low()    
-    print 'Apparent Temperature High:', ds.get_apparent_temperature_high()    
-    print 'Humidity:', ds.get_humidity()    
-    print 'Pressure:', ds.get_pressure()    
-    
-    
+    print 'Chances of rain:', ds.get_chances_rain()
+    print 'Temperature:', ds.get_temperature()
+    print 'Apparent Temperature:', ds.get_apparent_temperature()
+    print 'Apparent Temperature Low:', ds.get_apparent_temperature_low()
+    print 'Apparent Temperature High:', ds.get_apparent_temperature_high()
+    print 'Humidity:', ds.get_humidity()
+    print 'Pressure:', ds.get_pressure()
+
+
