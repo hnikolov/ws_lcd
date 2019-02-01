@@ -51,7 +51,8 @@ class DarkSky(object):
         try:
             self.search_date = datetime.now().strftime("%Y-%m-%dT%H:00:00")
             response = requests.get("https://api.darksky.net/forecast/"+self.DARK_SKY_API_KEY+"/"+self.latitude+","+self.longitude+","+self.search_date+"?"+self.option_list, headers=self.headers)    
-            self.response_json = response.json()
+            if response.status_code == 200:
+                self.response_json = response.json()
         except:
             pass
 
